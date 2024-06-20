@@ -1,0 +1,60 @@
+<div class="mt-3">
+      <div class="row">
+            <div class="col-1" id="navdiv">
+                  <ul>
+                        <li><a routerLink="/home" ><i class="fa-solid fa-house-flag"></i><span id="spamhover">Home</span></a></li>
+                        <li><a routerLink="/notification"><i class="fa-solid fa-envelope"></i><span id="spamhover">Notifications</span></a></li>
+                        <li><a routerLink="/holdings"><i class="fa-solid fa-hands-holding"></i><span id="spamhover">Holdings</span></a></li>
+                        <li><a routerLink="/addstock"><i class="fa-solid fa-cloud-arrow-up"></i><span id="spamhover">AddStock</span></a></li>
+                        <li><a  routerLink="/updatestocks"><i class="fa-solid fa-pen-nib"></i><span id="spamhover">UpdateStock</span></a></li>
+                        <li><a routerLink="/bankaccount"><i class="fa-solid fa-piggy-bank"></i><span id="spamhover">Bank</span></a></li>
+                        <li><a routerLink="/passbook"><i class="fa-solid fa-money-bill-transfer"></i><span id="spamhover">Statement</span></a></li>
+                        <li><a routerLink="/editstocks"><i class="fa-regular fa-pen-to-square"></i><span id="spamhover">Edit</span></a></li>
+                        
+                       
+                  </ul>
+            </div>
+            <div class=" container-lg col-10">
+                  <div class="row">
+                        <div class="col">  
+                              <div class="row">
+                                    <div class="col">
+                                          <p><i class="fs-6">{{dateAndTime }}</i></p>
+                                    </div>
+                                    <div class="col" *ngIf="pendingDataCount !=0">
+                                          <a class="btn btn-warning" routerLink="/monthdata/{{yearandmonth}}">Update stocks</a>
+                                    </div>
+                              </div>
+                              
+                        </div>
+                       <div class="col">
+                        <p *ngIf=message ngClass="{{class}}"> {{message}}</p>
+                       </div>
+                        <div class="col">
+                              <div class="float-end">
+                                   <div class="position-relative">
+                                    <a routerLink="/notification"><i  class="fa-solid fa-bell fs-5" style="color:rgb(255, 254, 254);"
+                                          *ngIf="notificationCount ==0"
+                                    ></i>
+                                    <i class="fa fa-bell fs-5" style="color:rgb(119, 207, 19);"
+                                          *ngIf="notificationCount >0"
+                                    ></i></a>
+            
+                                    <p class="position-absolute top-0 start-100 translate-middle fs-6"
+                                          *ngIf="notificationCount< 8"
+                                    >{{notificationCount}}</p>
+                                    <p class="position-absolute top-0 start-100 translate-middle fs-6"
+                                    *ngIf="notificationCount >= 8"
+                                    >8+</p>
+                                   </div>
+                              </div>
+                        </div>
+                  </div>
+                  <router-outlet />
+            </div>
+            <div class="col-1">
+                  
+            </div>
+      </div>
+</div>
+

@@ -1,0 +1,48 @@
+<div class="container-lg">
+      <div class="row">
+           <div class="col">
+            <p class="{{class}}">{{message}}</p>
+           </div>
+           <div class="col"></div>
+      </div>
+</div>
+<div class="container-lg">
+      <div class="row">
+            <div class="col-sm-6">
+                  <input type="file" (change)="upload($event)" class="form-control">
+            </div>
+            <div class="col-sm-6 text-center">
+                  <a class="btn btn-success" (click)="process()">Process</a>
+            </div>
+      </div>
+</div>
+<div *ngIf="displayStocks.length != 0" class="m-4">
+      <div class="card rounded">
+            <div class="card-header {{subclass}}">
+                  <h2>{{submessage}}</h2>
+            </div>
+            <div class="card-body overflow-auto rounded" style="height: 350px;">
+                  <div *ngFor="let i of displayStocks">
+                        
+                        <form #updatestock="ngForm" (ngSubmit)="updatestocks(updatestock)">
+                              <input type="hidden" class="form-control" [(ngModel)]="i.value.id" readonly name="id">
+                              <div class="row mt-3">
+                                    <div class="col">
+                                          <input type="text" class="form-control" [(ngModel)]="i.key" readonly name="stockname" style="border:none">
+                                    </div>
+                                    <div class="col">
+                                          <input type="number" class="form-control" [(ngModel)]="i.value.currentPrice" readonly style="border:none" name="currentvalue">
+                                    </div>
+                                    <div class="col">
+                                          <input type="number" class="form-control" [(ngModel)]="i.value.prisentPrice" name="prisentPrice" style="border:none">
+                                    </div>
+                                    <div class="col">
+                                          <button type="submit" class="btn btn-success" [disabled]="updatestock.invalid">Update</button>
+                                    </div>
+                              </div>
+                        </form>
+                  </div>
+            </div>
+      </div>
+</div>
+

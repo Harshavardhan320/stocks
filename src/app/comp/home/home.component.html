@@ -1,0 +1,126 @@
+<div class="container-lg">
+      <h4>{{message}}</h4>
+</div>
+<div class="container-lg">
+      <div class="cardscroll">
+            <div *ngFor="let i of yearmonthdata" class="card1">
+                  <div class="card1-body">
+                        <div class="row">
+                              <div class="col-4">
+                                    <div class="position-relative">
+                                          <h6><a routerLink="/monthdata/{{i.monthName}}">{{i.monthName}}</a></h6>
+                                    </div>
+                                    <div class="position-relative">
+                                          <h2 class="position-absolute bottom-0 start-100 rounded bg-danger m-1"
+                                                *ngIf="i.profit<=0" 
+                                          >{{i.profit.toFixed(2)}}</h2>
+                                          <h2 class="position-absolute bottom-0 start-100 rounded bg-success m-1"
+                                                *ngIf="i.profit>0"  style="color:aliceblue"
+                                          >{{i.profit.toFixed(2)}}</h2>
+                                    </div>
+                              </div>
+                        </div>
+                  </div>     
+            </div>
+      </div>
+</div>
+<div class="container-lg">
+      <p><b>Note:-</b>Present month Data <span><strong>{{yearmonthdata[0]?.monthName}}  </strong></span>
+            <span *ngIf="updatestatus=='INCOMPLET'"> &#9785;</span>
+            <span  *ngIf="updatestatus=='UPDATED'">&#x263A;</span>
+      </p>
+      <div class="card">
+            <div class="card-header {{class}}">
+                  <div class="row">
+                        <div class="col">
+                              <h4>{{message}}</h4>
+                        </div>
+                        <div class="col">
+                              <p><strong>Profit: </strong>
+                                    <i *ngIf="yearmonthdata[0]?.profit < 0" class=""
+                                    style="color:red"  
+                                    >{{(yearmonthdata[0]?.profit).toFixed(2)}}</i>
+                                    <i *ngIf="yearmonthdata[0]?.profit > 0" class=""
+                                          style="color:green"      
+                                    >{{(yearmonthdata[0]?.profit).toFixed(2)}}</i>
+                              </p>
+                        </div>
+                        <div class="col">
+                              <p><strong>Month Data Status:  </strong>
+                                    <span *ngIf="updatestatus=='INCOMPLET'"> &#9785;</span>
+                                    <span *ngIf="updatestatus=='UPDATED'">&#x263A;</span>
+                              </p>
+                        </div>
+                  </div>
+            </div>
+            <div class="card-body">
+                  <div class="overflow-auto position-relative" style="height: 290px;">
+                        <table class="table table-striped ">
+                              <thead class="bg-success position-sticky fixed-top">
+                                    <th class="p-2 card-text">Stock name</th>
+                                    <th class="p-2 card-text">Quantity</th>
+                                    <th class="p-2 card-text">Invested Rs/-</th>
+                                    <th class="p-2 card-text">Buying price</th>
+                                    <th class="p-2 card-text">Crr price</th>
+                                    <th class="p-2 card-text">Points gained</th>
+                                    <th class="p-2 card-text">profit</th>
+                                    <th class="p-2 card-text">Sold stocks</th>
+                                    <th class="p-2 card-text">Relesed Rs/-</th>
+                                    <th class="p-2 card-text">Status</th>
+                                    <th class="p-2">Buy/Sell</th>
+                              </thead>
+                              <tbody class="card-body text-center">
+                                    <tr *ngFor="let i of holdings" class="h6">
+                                          <td class="card-text" style="color: rgb(25, 0, 255);"><a routerLink="/stockdetails/{{i.id}}" id="link">{{i.stockName}}</a></td>
+                                          <td class="card-text"  style="color: green;">{{i.totalStocks}}</td>
+                                          <td class="card-text" style="color: rgb(26, 115, 170);">{{i.investedAmount}}</td>
+                                          <td class="card-text" style="color: rgb(211, 131, 179);">{{i.stockBuyingkPrise}}</td>
+                                          <td class="card-text" style="color: rgb(10, 97, 65);">{{i.currentPrise}}</td>
+                                          <!--points-->
+                                          <td class="card-text" style="color: rgb(235, 5, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise) <= 0"
+                                          >
+                                                {{(i.currentPrise - i.stockBuyingkPrise).toFixed(2)}}
+                                          </td>
+                                          <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise) > 0"
+                                          >
+                                                {{(i.currentPrise - i.stockBuyingkPrise).toFixed(2)}}
+                                          </td>
+                                          
+                                          <!--profit-->
+                                          <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks) > 0"
+                                          >
+                                                {{((i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks)).toFixed(2)}}
+                                          </td>
+                                          <td class="card-text" style="color: rgb(109, 5, 5);"
+
+                                          *ngIf="(i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks) <= 0"
+                                    >
+                                          {{((i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks)).toFixed(2)}}
+                                    </td>
+
+
+                                          <td class="card-text" style="color: red;">{{i.totalSoldStocks}}</td>
+                                          <td class="card-text" style="color: green;">{{i.totalReleasedAmount}}</td>
+                                          <td class="card-text" *ngIf="i.status=='SOLD'" style="color: red;">{{i.status}}</td>
+                                          <td class="card-text" *ngIf="i.status=='UNSOLD'" style="color: green;">{{i.status}}</td>
+                                          <td>
+                                                <div class="btn-group">
+                                                      <a routerLink="/buyorsellstocks/{{i.id}}/BUY/{{i.stockName}}" class="btn btn-primary">Add</a>
+                                                      <a routerLink="/buyorsellstocks/{{i.id}}/SELL/{{i.stockName}}" class="btn btn-danger">Sell</a>
+                                                </div>
+                                          </td>
+                                          
+                                    </tr>
+                                  
+                              </tbody>
+                        </table>
+                  </div>
+            </div>
+      </div>
+</div>      

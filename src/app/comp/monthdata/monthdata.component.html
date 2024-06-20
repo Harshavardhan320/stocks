@@ -1,0 +1,100 @@
+<div class="container-lg mt-2 {{class}}">
+     <div class="row">
+            <div class="col-6">
+                  <p>{{message}}</p>
+            </div>
+            <div class="col" *ngIf="yearmonthname[0]?.status =='UPDATED'">
+                  <div class="card">
+                        <div class="card-body">
+                              <div class="row">
+                                    <div class="col ">
+                                          <p class="fs-4"*ngIf="profitDetails?.profit<=10" style="color:red">profits : <strong>{{profitDetails.profit}}</strong></p>
+                                          <p class="fs-4" *ngIf="profitDetails?.profit>10" style="color:rgb(10, 109, 20)">profits : <strong>{{profitDetails.profit}}</strong></p>
+                                    </div>
+                                    <div class="col">
+                                          <p class="fs-4">Investemrnt : <i>{{profitDetails.investementAmount}}</i></p>
+                                    </div>
+                              </div>
+                        </div>
+                  </div>
+            </div>
+            <div class="col" *ngIf="yearmonthname[0]?.status =='PENDING'">
+                  <h5>Click To Change Status To "UPDATED" : <a (click)="ChangeStatus('UPDATED')" class="btn btn-warning p-2">update stocks</a></h5>
+            </div>
+     </div>
+</div>
+<div class="container-lg mt-1">
+      <div class="card">
+            <div class="card-header {{class}}">
+                  <h4>{{message}}</h4>
+            </div>
+            <div class="card-body">
+                  <div class="overflow-auto position-relative" style="height: 350px;">
+                        <table class="table table-striped ">
+                              <thead class="bg-success position-sticky fixed-top">
+                                    <th class="p-2 card-text">Stock name</th>
+                                    <th class="p-2 card-text">Quantity</th>
+                                    <th class="p-2 card-text">Invested Rs/-</th>
+                                    <th class="p-2 card-text">Buying price</th>
+                                    <th class="p-2 card-text">Crr price</th>
+                                    <th class="p-2 card-text">Points gained</th>
+                                    <th class="p-2 card-text">profit</th>
+                                    <th class="p-2 card-text">Sold stocks</th>
+                                    <th class="p-2 card-text">Relesed Rs/-</th>
+                                    <th class="p-2 card-text">Status</th>
+                                    <th class="p-2"  *ngIf="openbuyorsall">Buy/Sell</th>
+                              </thead>
+                              <tbody class="card-body text-center">
+                                    <tr *ngFor="let i of holdings" class="h6">
+                                          <td class="card-text" style="color: rgb(25, 0, 255);"><a routerLink="/stockdetails/{{i.id}}" id="link">{{i.stockName}}</a></td>
+                                          <td class="card-text"  style="color: green;">{{i.totalStocks}}</td>
+                                          <td class="card-text" style="color: rgb(26, 115, 170);">{{i.investedAmount}}</td>
+                                          <td class="card-text" style="color: rgb(211, 131, 179);">{{i.stockBuyingkPrise}}</td>
+                                          <td class="card-text" style="color: rgb(10, 97, 65);">{{i.currentPrise}}</td>
+                                          <!--points-->
+                                          <td class="card-text" style="color: rgb(235, 5, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise) <= 0"
+                                          >
+                                                {{(i.currentPrise - i.stockBuyingkPrise).toFixed(2)}}
+                                          </td>
+                                          <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise) > 0"
+                                          >
+                                                {{(i.currentPrise - i.stockBuyingkPrise).toFixed(2)}}
+                                          </td>
+                                          
+                                          <!--profit-->
+                                          <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks) > 0"
+                                          >
+                                                {{((i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks)).toFixed(2)}}
+                                          </td>
+                                          <td class="card-text" style="color: rgb(109, 5, 5);"
+
+                                          *ngIf="(i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks) <= 0"
+                                    >
+                                          {{((i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks)).toFixed(2)}}
+                                    </td>
+
+
+                                          <td class="card-text" style="color: red;">{{i.totalSoldStocks}}</td>
+                                          <td class="card-text" style="color: green;">{{i.totalReleasedAmount}}</td>
+                                          <td class="card-text" *ngIf="i.status=='SOLD'" style="color: red;">{{i.status}}</td>
+                                          <td class="card-text" *ngIf="i.status=='UNSOLD'" style="color: green;">{{i.status}}</td>
+                                          <td *ngIf="openbuyorsall">
+                                                <div class="btn-group">
+                                                      <a routerLink="buyorsellstocks/{{holdings?.id}}/BUY/{{i.stockName}}" class="btn btn-primary">Buy</a>
+                                                      <a routerLink="buyorsellstocks/{{holdings?.id}}/SELL/{{i.stockName}}" class="btn btn-danger">Sell</a>
+                                                </div>
+                                          </td>
+                                    </tr>
+                                    
+                              </tbody>
+                        </table>
+                  </div>
+            </div>
+      </div>
+</div>      

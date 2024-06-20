@@ -1,0 +1,34 @@
+ul{
+      list-style-type: none;
+      padding: 20px;
+      border-radius: 0px 10px 10px 0px;
+      height: max-content;
+      background-color:rgba(0, 0, 0, 0.558);
+      display: none;
+}
+#navdiv:hover ul{
+      display: block;
+}
+
+ul li a{
+      color: rgb(239, 236, 236);
+      font-size: large;
+      position: relative;
+}
+li a i{
+      text-decoration:  none;
+      margin:20px 0px 20px 0px;
+
+}
+#spamhover{
+      display:none;
+      font-size: xx-small;
+      
+      
+}
+li a:hover #spamhover {
+      color:rgb(224, 218, 218);
+      display: block;
+      position:absolute;
+      top: -15px;
+}

@@ -1,0 +1,192 @@
+<div class="containar-lg">
+      <div class="row">
+            <div class="col">
+                 <div class="{{class}}">
+                        <p>{{message}}</p>
+                 </div>
+            </div>
+            <div class="col"></div>
+            <div class="col"></div>
+      </div>
+</div>
+<div class="containar-lg m-3">
+      <div class="card rounded">
+            <div class="card-hearder bg-light p-4">
+                  <div class="row">
+                       <div class="col-md-3">
+                              <h5> {{message}} </h5>
+                       </div>
+                       <div class="col-md-3">
+                              <h5>Invested amount : {{holdings?.investedAmount}}</h5>
+                       </div>
+                       <div class="col-md-3">
+                              <h5>Profit Value : {{(holdings?.currentPrise * holdings?.totalStocks).toFixed(2)}}</h5>
+                       </div>
+                       <div class="col-md-3">
+                        <h5> <a routerLink="/analysis" class="btn btn-primary">Profit Analysis</a> </h5>
+                 </div>
+                  </div>
+            </div>
+            <div class="card-body">
+                  <div class="overflow-auto position-relative">
+                        <table class="table table-striped ">
+                              <thead class="bg-success position-sticky fixed-top">
+                                    <th class="p-2 card-text">Stock name</th>
+                                    <th class="p-2 card-text">Quantity</th>
+                                    <th class="p-2 card-text">Invested Rs/-</th>
+                                    <th class="p-2 card-text">Buying price</th>
+                                    <th class="p-2 card-text">Crr price</th>
+                                    <th class="p-2 card-text">Points gained</th>
+                                    <th class="p-2 card-text">profit</th>
+                                    <th class="p-2 card-text">Sold stocks</th>
+                                    <th class="p-2 card-text">Relesed Rs/-</th>
+                                    <th class="p-2 card-text">Status</th>
+                                    <th class="p-2"  *ngIf="openbuyorsall">Buy/Sell</th>
+                              </thead>
+                              <tbody class="card-body text-center">
+                                    <tr>
+                                          <td class="card-text bg-waraning" style="color: rgb(25, 0, 255);">{{holdings?.stockName}}</td>
+                                          <td class="card-text"  style="color: green;">{{holdings?.totalStocks}}</td>
+                                          <td class="card-text" style="color: rgb(26, 115, 170);">{{holdings?.investedAmount}}</td>
+                                          <td class="card-text" style="color: rgb(211, 131, 179);">{{holdings?.stockBuyingkPrise}}</td>
+                                          <td class="card-text" style="color: rgb(10, 97, 65);">{{holdings?.currentPrise}}</td>
+                                          <!--points-->
+                                          <td class="card-text" style="color: rgb(235, 5, 5);"
+
+                                          *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise) <= 0"
+                                          >
+                                                {{(holdings?.currentPrise - holdings?.stockBuyingkPrise).toFixed(2)}}
+                                          </td>
+                                          <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise) > 0"
+                                          >
+                                                {{(holdings?.currentPrise - holdings?.stockBuyingkPrise).toFixed(2)}}
+                                          </td>
+                                          
+                                          <!--profit-->
+                                          <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks) > 0"
+                                          >
+                                                {{((holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks)).toFixed(2)}}
+                                          </td>
+                                          <td class="card-text" style="color: rgb(109, 5, 5);"
+
+                                                *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks) <= 0"
+                                          >
+                                                {{((holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks)).toFixed(2)}}
+                                          </td>
+
+
+                                          <td class="card-text" style="color: red;">{{holdings?.totalSoldStocks}}</td>
+                                          <td class="card-text" style="color: green;">{{holdings?.totalReleasedAmount}}</td>
+                                          <td class="card-text" *ngIf="holdings?.status=='SOLD'" style="color: red;">{{holdings?.status}}</td>
+                                          <td class="card-text" *ngIf="holdings?.status=='UNSOLD'" style="color: green;">{{holdings?.status}}</td>
+                                          <td *ngIf="openbuyorsall">
+                                                <div class="btn-group">
+                                                      <a routerLink="/buyorsellstocks/{{holdings?.id}}/BUY/{{holdings?.stockName}}" class="btn btn-primary">Buy</a>
+                                                      <a routerLink="/buyorsellstocks/{{holdings?.id}}/SELL/{{holdings?.stockName}}" class="btn btn-danger">Sell</a>
+                                                </div>
+                                          </td>
+                                    
+                                    </tr>
+                              </tbody>
+                        </table>
+                  </div>
+            </div>
+      </div>
+</div>
+<div class="row">
+      <div class="col-6">
+            <div class="container-lg m-3">
+                  <h4 class="text-center text-success">Buy Quantity</h4>
+                  <div class="cardscroll">
+                        <div *ngFor="let i of holdingsBuyQuantity" class="card1">
+                              <div class="card1-body">
+                                    <div class="row1">
+                                          <div class="col1-4">
+                                               <table>
+                                                      <tr>
+                                                            <th>Quantity</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.quantity}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>Price Of buy</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.buyingPrise}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>investedAmount</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.investedAmount}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>taxes + brockerage</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.taxes + i.brokerage}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>Date</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{(i.date).substring(0, 10)}} {{(i.date).substring(12, i.date.length-13)}}</td>
+                                                      </tr>
+            
+                                               </table>
+                                          </div>
+                                    </div>
+                              </div>     
+                        </div>
+                  </div>
+            </div>
+      </div>
+      <div class="col-6">
+            <div class="container-lg m-3">
+                  <h4 class="text-center text-danger">Sold Quantity</h4>
+                  <div class="cardscroll">
+                        <div *ngFor="let i of holdingsSellingQuantity" class="card1">
+                              <div class="card1-body">
+                                    <div class="row1">
+                                          <div class="col1-4">
+                                               <table>
+                                                      <tr>
+                                                            <th>Quantity</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.quantity}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>Price Of sell</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.sellingPrise}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>Relesed Amount</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.relesedamount}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>taxes + brockerage</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{i.taxes + i.brokerage}}</td>
+                                                      </tr>
+                                                      <tr>
+                                                            <th>Date</th>
+                                                            <td><b>:</b></td>
+                                                            <td>&nbsp;{{(i.date).substring(0, 10)}} {{(i.date).substring(12, i.date.length-13)}}</td>
+                                                      </tr>
+                                               </table>
+                                          </div>
+                                    </div>
+                              </div>     
+                        </div>
+                        <div style="text-align: center;" class="card m-5" *ngIf="holdingsSellingQuantity.length === 0">
+
+                              <div class="card-body">
+                                    <h4 class="text-success">No Quantity Sold</h4>
+                              </div>
+                        </div>
+                  </div>
+            </div>
+      </div>
+</div>

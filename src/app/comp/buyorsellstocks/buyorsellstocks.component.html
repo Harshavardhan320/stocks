@@ -1,0 +1,199 @@
+<div class="container-lg">
+      <div class="row">
+            <div class="col-sm-12">
+                  <p class="{{class}}">{{message.toUpperCase()}}</p>
+            </div>
+      </div>
+</div>
+<div class="container-lg">
+      <div class="card-body">
+            <div class="overflow-auto position-relative">
+                  <table class="table table-striped ">
+                        <thead class="bg-success position-sticky fixed-top">
+                              <th class="p-2 card-text">Stock name</th>
+                              <th class="p-2 card-text">Quantity</th>
+                              <th class="p-2 card-text">Invested Rs/-</th>
+                              <th class="p-2 card-text">Buying price</th>
+                              <th class="p-2 card-text">Crr price</th>
+                              <th class="p-2 card-text">Points gained</th>
+                              <th class="p-2 card-text">profit</th>
+                              <th class="p-2 card-text">Sold stocks</th>
+                              <th class="p-2 card-text">Relesed Rs/-</th>
+                              <th class="p-2 card-text">Status</th>
+                              <th class="p-2">Buy/Sell</th>
+                        </thead>
+                        <tbody class="card-body text-center">
+                              <tr>
+                                    <td class="card-text bg-waraning" style="color: rgb(25, 0, 255);"><a routerLink="/stockdetails/{{holdings?.id}}" id="link">{{holdings?.stockName}}</a></td>
+                                    <td class="card-text"  style="color: green;">{{holdings?.totalStocks}}</td>
+                                    <td class="card-text" style="color: rgb(26, 115, 170);">{{holdings?.investedAmount}}</td>
+                                    <td class="card-text" style="color: rgb(211, 131, 179);">{{holdings?.stockBuyingkPrise}}</td>
+                                    <td class="card-text" style="color: rgb(10, 97, 65);">{{holdings?.currentPrise}}</td>
+                                    <!--points-->
+                                    <td class="card-text" style="color: rgb(235, 5, 5);"
+
+                                    *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise) <= 0"
+                                    >
+                                          {{(holdings?.currentPrise - holdings?.stockBuyingkPrise).toFixed(2)}}
+                                    </td>
+                                    <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                          *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise) > 0"
+                                    >
+                                          {{(holdings?.currentPrise - holdings?.stockBuyingkPrise).toFixed(2)}}
+                                    </td>
+                                    
+                                    <!--profit-->
+                                    <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                          *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks) > 0"
+                                    >
+                                          {{((holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks)).toFixed(2)}}
+                                    </td>
+                                    <td class="card-text" style="color: rgb(109, 5, 5);"
+
+                                          *ngIf="(holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks) <= 0"
+                                    >
+                                          {{((holdings?.currentPrise - holdings?.stockBuyingkPrise)*(holdings?.totalStocks)).toFixed(2)}}
+                                    </td>
+
+
+                                    <td class="card-text" style="color: red;">{{holdings?.totalSoldStocks}}</td>
+                                    <td class="card-text" style="color: green;">{{holdings?.totalReleasedAmount}}</td>
+                                    <td class="card-text" *ngIf="holdings?.status=='SOLD'" style="color: red;">{{holdings?.status}}</td>
+                                    <td class="card-text" *ngIf="holdings?.status=='UNSOLD'" style="color: green;">{{holdings?.status}}</td>
+                                    <td>
+                                          <div class="btn-group">
+                                                <a routerLink="/buyorsellstocks/{{holdings?.id}}/BUY/{{holdings?.stockName}}" class="btn btn-primary">Add</a>
+                                                <a routerLink="/buyorsellstocks/{{holdings?.id}}/SELL/{{holdings?.stockName}}" class="btn btn-danger">Sell</a>
+                                          </div>
+                                    </td>
+                              </tr>
+                        </tbody>
+                  </table>
+            </div>
+      </div>
+</div>
+<div class="container-lg" *ngIf="buyorsell == 'BUY'">
+      <form #buy="ngForm" (ngSubmit)="formbuystocks(buy)">
+            <div class="row">
+                  <div class="col">
+                        <div class="form-group">
+                              <label for="stockname" class="m-3 fs-4"><b>Stock Name : <i style="color:red">*</i></b></label>
+                              <input type="text" class="form-control p-3" name="stockname" placeholder="Stock Name" 
+                                    [(ngModel)]="stockName" readonly
+                                    required ngModel #stockname="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="stockname.touched && stockname.invalid">
+                                    <span *ngIf="stockname.errors?.['required']" style="color:red">Stock Name is required</span>
+                              </div>
+                        </div>
+                        <div class="form-group mt-5">
+                              <label for="taxes" class="m-3 fs-4"><b>Buying taxes : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="buyingtaxes" placeholder="Buying taxes" 
+                              
+                                    required ngModel #buyingtaxes="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="buyingtaxes.touched && buyingtaxes.invalid">
+                                    <span *ngIf="buyingtaxes.errors?.['required']" style="color:red">Stock taxes is required</span>
+                              </div>
+                        </div>
+                  </div>
+                  <div class="col">
+                        <div class="form-group">
+                              <label for="Quantity" class="m-3 fs-4"><b>Quantity : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="quantity" placeholder="Enter Quantity" 
+                              
+                              pattern="^-?[0-9]+$" required ngModel #quantity="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="quantity.touched && quantity.invalid">
+                                    <span *ngIf="quantity.errors?.['required']" style="color:red">Stock  Quantity is required</span>
+                                    <span *ngIf="quantity.errors?.['pattern']" style="color:red">Invalid Stock Quantity</span>
+                              </div>
+                        </div>
+                        <div class="form-group mt-5">
+                              <label for="buying" class="m-3 fs-4"><b>Stock Buying Price : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="stockprice" placeholder="Stock price" 
+                              
+                                    required ngModel #stockprice="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="stockprice.touched && stockprice.invalid">
+                                    <span *ngIf="stockprice.errors?.['required']" style="color:red"> Stock price is required</span>
+                              </div>
+                        </div> 
+                  </div>
+            </div>
+            <div class="mt-5">
+                  <button type="submit" class="btn btn-primary p-3" [disabled]="buy.invalid">Add Quantity</button>
+            </div>
+      </form>
+</div>
+<div class="container-lg" *ngIf="buyorsell == 'SELL'">
+      <form #sell="ngForm" (ngSubmit)="formsellstocks(sell)">
+            <div class="row">
+                  <div class="col">
+                        <div class="form-group">
+                              <label for="stockname" class="m-3 fs-4"><b>Stock Name : <i style="color:red">*</i></b></label>
+                              <input type="text" class="form-control p-3" name="stockname" placeholder="Stock Name" 
+                                    [(ngModel)]="stockName" readonly
+                                    required ngModel #stockname="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="stockname.touched && stockname.invalid">
+                                    <span *ngIf="stockname.errors?.['required']" style="color:red">Stock Name is required</span>
+                              </div>
+                        </div>
+                        <div class="form-group">
+                              <label for="Quantity" class="m-3 fs-4"><b>Quantity : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="quantity" placeholder="Enter Quantity" 
+                              
+                              pattern="^-?[0-9]+$" required ngModel #quantity="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="quantity.touched && quantity.invalid">
+                                    <span *ngIf="quantity.errors?.['required']" style="color:red">Stock  Quantity is required</span>
+                                    <span *ngIf="quantity.errors?.['pattern']" style="color:red">Invalid Stock Quantity</span>
+                              </div>
+                        </div>
+                        <div class="form-group">
+                              <label for="selling" class="m-3 fs-4"><b>Stock selling Price : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="sellingprice" placeholder="Stock Selling Price" 
+                              
+                                    required ngModel #sellingprice="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="sellingprice.touched && sellingprice.invalid">
+                                    <span *ngIf="sellingprice.errors?.['required']" style="color:red"> Stock price is required</span>
+                              </div>
+                        </div> 
+                  </div>
+                  <div class="col">
+                        <div class="form-group">
+                              <label for="sellingtaxes" class="m-3 fs-4"><b>Stock selling taxes : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="sellingtaxes" placeholder="Stock selling taxes" 
+                              
+                                    required ngModel #sellingtaxes="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="sellingtaxes.touched && sellingtaxes.invalid">
+                                    <span *ngIf="sellingtaxes.errors?.['required']" style="color:red"> Stock price is required</span>
+                              </div>
+                        </div> 
+                        <div class="form-group">
+                              <label for="brockerage" class="m-3 fs-4"><b>Brockerage : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="brockerage" placeholder="Stock Brockerage" 
+                              
+                                    required ngModel #brockerage="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="brockerage.touched && brockerage.invalid">
+                                    <span *ngIf="brockerage.errors?.['required']" style="color:red"> Stock price is required</span>
+                              </div>
+                        </div> 
+                        <div class="mt-5 form-group">
+                              <button type="submit" class="btn btn-primary p-3" [disabled]="sell.invalid">Sell Stock</button>
+                        </div>
+                  </div>
+            </div>
+      </form>
+</div>
+<div class="container-lg" *ngIf="buyorsell != 'SELL' && buyorsell != 'BUY'">
+      <div class="h3 text-center alert alert-warning">
+            <p>Invalid URL. Go Back to :- <a routerLink="/home">Home</a></p>
+      </div>
+</div>

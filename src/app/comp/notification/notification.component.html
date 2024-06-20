@@ -1,0 +1,26 @@
+<div class="container-lg">
+      <div class="card">
+            <div class="card-header {{class}}">
+                  <h3>{{message}} &nbsp;&nbsp;<i *ngIf="notificationCount !=0">{{notificationCount}}</i></h3>
+            </div>
+            <div class="card-body overflow-auto" style="height: 450px;">
+                  <table class="table table-striped">
+                        <!-- <thead>
+                              <tr>
+                                    <th scope="col">Notification Name</th>
+                                    <th scope="col">Message</th>
+                                    <th scope="col">Time</th>
+                              </tr>
+                        </thead> -->
+                        <tbody style="cursor: pointer;">
+                              <tr *ngFor="let i of notificationData" (click)="updateSeenStatus(i.id)" scopr="row">
+                                    <td class="fs-4" *ngIf="i.seen=='UNSEEN'" style="color: rgb(44, 78, 79);"><b>{{i.alertname}}</b></td>
+                                    <td class="fs-6" *ngIf="i.seen=='SEEN'" style="color: rgba(41, 48, 66, 0.534)"><b>{{i.alertname}}</b></td>
+                                    <td class="text-muted fs-6">{{i.message}}</td>
+                                    <td class="text-muted fs-5"><i>{{i.date}}</i></td>
+                              </tr>
+                        </tbody>
+                  </table>
+            </div>
+      </div>
+</div>

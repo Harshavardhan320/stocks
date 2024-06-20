@@ -1,0 +1,57 @@
+.container-lg {
+      width: 100%;
+      overflow-x: auto;
+    }
+    
+    .cardscroll {
+      display: flex;
+      flex-wrap: nowrap;
+    }
+    
+    .card1 {
+      flex: 0 0 auto;
+      margin: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      background-color: rgb(255, 255, 255);
+    }
+    .card1 a{
+      color: rgb(46, 200, 167);
+      text-decoration: none;
+    }
+    
+    .card1-body {
+      padding: 10px;
+    }
+    
+    .row {
+      display: flex;
+    }
+    
+    .col-4 {
+      flex: 0 0 33.3333%;
+      max-width: 33.3333%;
+    }
+    .dot {
+      height: 15px;
+      width: 15px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+}
+#link{
+  text-decoration: none;
+}
+#link:hover{
+  color: rgb(0, 0, 0);
+  text-decoration: underline;
+}
+.bg-danger {
+  background-color: red;
+}
+
+.bg-white {
+  background-color: white;
+}

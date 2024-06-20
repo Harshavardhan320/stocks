@@ -1,0 +1,65 @@
+<div class="containar-lg">
+      <div class="row">
+            <div class="col">
+                 <div class="{{class}}">
+                        <p>{{message}}</p>
+                 </div>
+            </div>
+            <div class="col"></div>
+            <div class="col"></div>
+      </div>
+</div>
+<div class="containar-lg m-5">
+      <form #addstocks="ngForm" (ngSubmit)="addstock(addstocks)">
+            <div class="row">
+                  <div class="col">
+                        <div class="form-group">
+                              <label for="stockname" class="m-3 fs-4"><b>Stock Name : <i style="color:red">*</i></b></label>
+                              <input type="text" class="form-control p-3" name="stockname" placeholder="Stock Name" 
+                                    
+                                    required ngModel #stockname="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="stockname.touched && stockname.invalid">
+                                    <span *ngIf="stockname.errors?.['required']" style="color:red">Stock Name is required</span>
+                              </div>
+                        </div>
+                        <div class="form-group mt-5">
+                              <label for="Quantity" class="m-3 fs-4"><b>Quantity : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="quantity" placeholder="Enter Quantity" 
+                              
+                              pattern="^-?[0-9]+$" required ngModel #quantity="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="quantity.touched && quantity.invalid">
+                                    <span *ngIf="quantity.errors?.['required']" style="color:red">Stock  Quantity is required</span>
+                                    <span *ngIf="quantity.errors?.['pattern']" style="color:red">Invalid Stock Quantity</span>
+                              </div>
+                        </div>
+                  </div>
+                  <div class="col">
+                        <div class="form-group">
+                              <label for="buyingprice" class="m-3 fs-4"><b>Stock Price : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="stockprise" placeholder="Stock price" 
+                              
+                                    required ngModel #stockprise="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="stockprise.touched && stockprise.invalid">
+                                    <span *ngIf="stockprise.errors?.['required']" style="color:red"> Stock price is required</span>
+                              </div>
+                        </div> 
+                        <div class="form-group mt-5">
+                              <label for="stocktaxes" class="m-3 fs-4"><b>Buying taxes : <i style="color:red">*</i></b></label>
+                              <input type="number" class="form-control p-3" name="buyingtaxes" placeholder="Buying taxes" 
+                              
+                                    required ngModel #buyingtaxes="ngModel"
+                              >
+                              <div class="mt-2" *ngIf="buyingtaxes.touched && buyingtaxes.invalid">
+                                    <span *ngIf="buyingtaxes.errors?.['required']" style="color:red">Stock taxes is required</span>
+                              </div>
+                        </div>
+                  </div>
+            </div>
+            <div class="mt-5">
+                  <button type="submit" class="btn btn-primary p-3" [disabled]="addstocks.invalid">Buy Stock</button>
+            </div>
+      </form>
+</div>

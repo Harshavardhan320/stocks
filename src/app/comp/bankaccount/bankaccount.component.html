@@ -1,0 +1,78 @@
+<div class="containar-lg">
+      <div class="row">
+            <div class="col-md-12">
+                  <h1 class="text-center {{class}}">{{message}}</h1>
+            </div>
+      </div>
+</div>
+<div class="containar-lg">
+      <div class="row">
+            <div class="col">
+                  <form #addbalance="ngForm" (ngSubmit)="addBalance(addbalance)">
+                        <div class="form-group">
+                              <label for="balance">Enter Amount <i style="color:red">*</i></label>
+                              <input type="number" class="form-control mt-3 p-4" placeholder="Enter Amount" name="deposit"
+                                    required ngModel #amount="ngModel"
+                              >
+                              <div *ngIf="amount.touched && amount.invalid" class="mt-3">
+                                    <span *ngIf="amount.errors?.['required']" style="color:red">please Enter Amount</span>
+                              </div>
+                        </div>
+                       
+
+                        <div class="form-group">
+
+                              <input type="text" value="DEPOSIT" [(ngModel)]="deposit"  class="form-control mt-3 p-4" 
+                                    name="paymentType"
+                                    readonly
+                              >
+                        </div>
+                       
+                        <div class="mt-5">
+                              <button type="submit" class="btn btn-primary p-4" [disabled]="addbalance.invalid">Add Balance</button>
+                        </div>
+                  </form>
+            </div>
+            <div class="col">
+                  <div class="card mt-5">
+                        <div class="card-header">
+                              <h5 class="card-title">Balance Information</h5> 
+                        </div>
+                        <div class="card-body">
+                             <div class="row">
+                                    <div class="col">
+                                          <p>Balance<b> : <mark class="rounded">{{accountbalance}}</mark></b></p>
+                                    </div>
+                                    <div class="col">
+                                          <p>Amount<b> : <mark  class="rounded">{{paymentType}}</mark></b></p>
+                                    </div>
+                             </div>
+                        </div>
+                  </div>
+            </div>
+      </div>
+      <div class="row">
+            <div class="col">
+                  <h3 class="mt-4">Withdraw</h3>
+                  <form #withdraw="ngForm" (ngSubmit)="withdrawAmount(withdraw)">
+                       <div class="row">
+                              <div class="col">
+                                    <div class="form-group">
+                                          <input type="number" class="form-control mt-3 p-4" placeholder="Withdraw Amount" name="Withdraw"
+                                                required ngModel #Withdraw="ngModel"
+                                          >
+                                          <div *ngIf="Withdraw.touched && Withdraw.invalid"class="mt-3">
+                                                <span *ngIf="Withdraw.errors?.['required']" style="color:red">please Enter Withdraw Amount</span>
+                                          </div>
+                                    </div>
+                              </div>
+                              <div class="col mt-4">
+                                    <button type="submit" class="btn btn-primary p-3" [disabled]="withdraw.invalid">Withdraw Amount</button>
+
+                              </div>
+                       </div>
+                  </form>
+            </div>
+            <div class="col"></div>
+      </div>
+</div>

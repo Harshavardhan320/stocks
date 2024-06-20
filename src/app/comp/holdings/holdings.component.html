@@ -1,0 +1,131 @@
+<div class="card mt-4">
+      <div class="card-header">
+           <div class="row">
+                  <div class="col">
+                        <p class="{{class}}">{{message}}</p>
+                  </div>
+                  <div class="col">
+                        <p  style="color: rgb(235, 5, 5);" *ngIf="profit <= 0"><b>Profit : {{profit.toFixed(2)}}</b></p>
+                        <p  style="color: rgb(38, 134, 8);" *ngIf="profit > 0"><b>Profit : {{profit.toFixed(2)}}</b></p>
+                  </div>
+                  <div class="col">
+                        <p><b>Invested Amount : {{investmentAmount}}</b></p>
+                  </div>
+           </div>
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                  <li class="nav-item">
+                        <a class="nav-link disabled" id="disabled-tab" data-bs-toggle="tab" href="#disabled" role="tab" aria-controls="disabled" tabindex="-1" aria-disabled="true">Holdings</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Unsold</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Sold Stocks</a>
+                  </li>
+            </ul>
+      </div>
+      <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+                  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="overflow-auto position-relative" style="height: 410px;" *ngIf="unsold != null" >
+                              <table class="table table-striped ">
+                                    <thead class="bg-success position-sticky fixed-top">
+                                          <th class="p-2 card-text">Stock name</th>
+                                          <th class="p-2 card-text">Quantity</th>
+                                          <th class="p-2 card-text">Invested Rs/-</th>
+                                          <th class="p-2 card-text">Buying price</th>
+                                          <th class="p-2 card-text">Crr price</th>
+                                          <th class="p-2 card-text">Points gained</th>
+                                          <th class="p-2 card-text">profit</th>
+                                          <th class="p-2 card-text">Sold stocks</th>
+                                          <th class="p-2 card-text">Relesed Rs/-</th>
+                                          <th class="p-2 card-text">Status</th>
+                                          <th class="p-2">Buy/Sell</th>
+                                    </thead>
+                                    <tbody class=" text-center">
+                                          <tr *ngFor="let i of unsold" class="h6">
+                                                <td class="card-text" style="color: rgb(25, 0, 255);"><a routerLink="/stockdetails/{{i.id}}" id="link">{{i.stockName}}</a></td>
+                                                <td class="card-text"  style="color: green;">{{i.totalStocks}}</td>
+                                                <td class="card-text" style="color: rgb(26, 115, 170);">{{i.investedAmount}}</td>
+                                                <td class="card-text" style="color: rgb(211, 131, 179);">{{i.stockBuyingkPrise}}</td>
+                                                <td class="card-text" style="color: rgb(10, 97, 65);">{{i.currentPrise}}</td>
+                                                <!--points-->
+                                                <td class="card-text" style="color: rgb(235, 5, 5);"
+
+                                                      *ngIf="(i.currentPrise - i.stockBuyingkPrise) <= 0"
+                                                >
+                                                      {{(i.currentPrise - i.stockBuyingkPrise).toFixed(2)}}
+                                                </td>
+                                                <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                      *ngIf="(i.currentPrise - i.stockBuyingkPrise) > 0"
+                                                >
+                                                      {{(i.currentPrise - i.stockBuyingkPrise).toFixed(2)}}
+                                                </td>
+                                                
+                                                <!--profit-->
+                                                <td class="card-text" style="color: rgb(64, 109, 5);"
+
+                                                      *ngIf="(i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks) > 0"
+                                                >
+                                                      {{((i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks)).toFixed(2)}}
+                                                </td>
+                                                <td class="card-text" style="color: rgb(109, 5, 5);"
+
+                                                *ngIf="(i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks) <= 0"
+                                          >
+                                                {{((i.currentPrise - i.stockBuyingkPrise)*(i.totalStocks)).toFixed(2)}}
+                                          </td>
+
+
+                                                <td class="card-text" style="color: red;">{{i.totalSoldStocks}}</td>
+                                                <td class="card-text" style="color: green;">{{i.totalReleasedAmount}}</td>
+                                                <td class="card-text" *ngIf="i.status=='SOLD'" style="color: red;">{{i.status}}</td>
+                                                <td class="card-text" *ngIf="i.status=='UNSOLD'" style="color: green;">{{i.status}}</td>
+                                                <td>
+                                                      <div class="btn-group">
+                                                            <a routerLink="/buyorsellstocks/{{i.id}}/BUY/{{i.stockName}}" class="btn btn-primary">Add</a>
+                                                            <a routerLink="/buyorsellstocks/{{i.id}}/SELL/{{i.stockName}}" class="btn btn-danger">Sell</a>
+                                                      </div>
+                                                </td>
+                                          </tr>
+                                    </tbody>
+                              </table>
+                        </div>
+                        <div style="height: 410px;"  *ngIf="unsold == null">
+                              <h1 class="text-center p-5 alert alert-danger">No Stocks in holdings....</h1>
+                        </div>
+                  </div>
+
+                  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      
+                        <div class="overflow-auto position-relative" style="height: 410px;"  *ngIf="sold != null">
+                              <table class="table table-striped ">
+                                    <thead class="bg-success position-sticky fixed-top">
+                                          <th class="p-2 card-text">Stock name</th>
+                                          <th class="p-2 card-text">Quantity Sold</th>
+                                          <th class="p-2 card-text">Relesed Rs/-</th>
+                                          <th class="p-2 card-text">selling prise price</th>
+                                          <th class="p-2 card-text">Status</th>
+                                    </thead>
+                                    <tbody class="card-body">
+                                          <tr *ngFor="let i of sold" class="h6">
+                                                <td class="card-text" style="color: rgb(25, 0, 255);"><a routerLink="/stockdetails/{{i.id}}" id="link">{{i.stockName}}</a></td>
+                                                <td class="card-text" style="color: red;">{{i.totalSoldStocks}}</td>
+                                                <td class="card-text" style="color: rgb(128, 2, 0);" *ngIf="i.totalReleasedAmount<0">{{i.totalReleasedAmount}}</td>
+                                                <td class="card-text" style="color: green;" *ngIf="i.totalReleasedAmount>0">{{i.totalReleasedAmount}}</td>
+                                                <td class="card-text" style="color: rgb(0, 0, 0);">{{i.currentPrise}}</td>
+                                                <td class="card-text" *ngIf="i.status=='SOLD'" style="color: red;">{{i.status}}</td>
+                                                <td class="card-text" *ngIf="i.status=='UNSOLD'" style="color: green;">{{i.status}}</td>
+                                                
+                                          </tr>
+                                    </tbody>
+                              </table>
+                        </div>
+                        <div style="height: 410px;"  *ngIf="sold == null">
+                              <h1 class="text-center p-5 alert alert-danger">No Stocks Sold</h1>
+                        </div>
+                  </div>
+            </div>
+      </div>
+</div>
