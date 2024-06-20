@@ -1,0 +1,836 @@
+package com.stock.calculation.service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DateFormatSymbols;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import com.stock.calculation.entitys.Alert;
+import com.stock.calculation.entitys.BankAccount;
+import com.stock.calculation.entitys.BankAccount.PaymentMethod;
+import com.stock.calculation.entitys.BuyStockQuantity;
+import com.stock.calculation.entitys.Holdings;
+import com.stock.calculation.entitys.QuantityBuyorSell;
+import com.stock.calculation.entitys.SellStockQuantity;
+import com.stock.calculation.entitys.YearAndMonth;
+import com.stock.calculation.exception.AmountException;
+import com.stock.calculation.exception.CalandarException;
+import com.stock.calculation.exception.StockException;
+import com.stock.calculation.pojo.MonthProfitPojo;
+import com.stock.calculation.pojo.ProfitDetails;
+import com.stock.calculation.pojo.UpDateCrrPrice;
+import com.stock.calculation.repository.HoldingesRepository;
+
+@Service
+public class HoldingsService {
+
+	/*
+	 * Auto injecting HoldingesRepository object
+	 *  Auto injecting BalanceService object.
+	 *  				
+	 */
+	@Autowired
+	HoldingesRepository holdingesRepository;
+	
+	@Autowired
+	BalanceService balanceService;
+	/*
+	 * 2
+	 * Auto injecting alert service
+	 * 
+	 */
+	@Autowired
+	AlertService alertService;
+	
+	/*
+	 * 3
+	 * Auto injecting YearAndMonthService service
+	 * 
+	 */
+	@Autowired
+	YearAndMonthService yearAndMonthService;
+
+	
+	
+	//-----------------------------------------****--------------------------------------
+	
+	
+	
+	
+	
+	
+	/*
+	 * find all stocks
+	 */
+	public List<Holdings> getAllStocks() {
+		try {
+			return this.holdingesRepository.findAll();
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Server not responding.");
+		}
+	}
+	
+	/*
+	 * 3
+	 * Service method for buying stocks
+	 */
+	public Holdings buyStock(Holdings holdings) throws StockException, AmountException, CalandarException{
+		/*
+		 * 0
+		 * error Status
+		 */
+		int error =0;
+		double scale = Math.pow(10, 2);
+		
+		String stockName = holdings.getStockName();
+		BuyStockQuantity buyingquantity = holdings.getBuyingquantity().get(0);
+		double stocBuyingkPrise = holdings.getStockBuyingkPrise();
+		double currentPrise = holdings.getCurrentPrise();
+		long yearMonth = holdings.getYearMonth().getId();
+		Holdings.Status status = holdings.getStatus();
+		
+		/*
+		 * 1
+		 * Checking in coming data 
+		 * 
+		 */
+		if(holdings == null || buyingquantity== null || stocBuyingkPrise <= 0 || currentPrise <=0
+				|| status==null || stockName==null  || stockName=="" || yearMonth<=0 || yearMonth<=0) {
+			error +=1;
+			throw new NullPointerException("Invalid Input. Check your buying data");
+		}
+			
+		
+		 int Quantity = buyingquantity.getQuantity();
+		 double Buyingtaxes = buyingquantity.getTaxes();
+		 double buyingPrise = buyingquantity.getBuyingPrise();
+		 double investedAmount = Quantity*buyingPrise;
+		 
+		 /*
+		  * 2
+		  * checking stock data
+		  */
+		 if(Quantity <=0 || Buyingtaxes <0 ||  buyingPrise<=0 || investedAmount<=0 ) {
+			 	error +=1;
+				throw new NullPointerException("Invalid Input. Check your stock Date");
+			}
+		
+		/*
+		 * 3
+		 * Checking stock present in this month. Thought stock name, status, and yearMonth 
+		 * 
+		 * If stock is present in the month it will throws exception "StockException".
+		 */
+		Optional<Holdings> exestingStockDate = this.holdingesRepository.findByStockNameAndStatusAndMonth(stockName, yearMonth);
+		
+		if(exestingStockDate.isPresent()) {
+			error +=1;
+			throw new StockException("Your "+stockName+" stock is unsold in this month, You can add throught extra quantity.");
+		}
+		
+		/*
+		 * 4
+		 * checking the year and month of stock buying
+		 */
+
+		Calendar calendar  = Calendar.getInstance();
+		int year = calendar.get(Calendar.YEAR);
+		int month =  calendar.get(Calendar.MONTH);
+		String[] monthNames = new DateFormatSymbols().getMonths();
+		
+		String Stringyear = String.valueOf(year);
+		String monthName = monthNames[month];
+		
+		String presentYearMonth = Stringyear.concat(" "+monthName);
+		
+		List<YearAndMonth> pera= this.yearAndMonthService.findyearmonth(presentYearMonth);
+		
+		long presentMonthId = pera.get(0).getId();
+		
+		if(yearMonth == presentMonthId) {
+			holdings.setYearMonth(pera.get(0));
+		}else {
+			error +=1;
+			throw new InputMismatchException("Invalid Year and month");
+		}
+		/*
+		 * 5
+		 * getting invest amount and total number of quantity.
+		 */
+		if(error==0) {
+			holdings.setTotalStocks(Quantity);
+			
+			/*
+			 * investing amount
+			 * 
+			 * removing all decimal values
+			 */
+			
+			double roundedAmount = Math.round(investedAmount* scale) / scale;
+			
+			holdings.setInvestedAmount(roundedAmount);
+			buyingquantity.setInvestedAmount(roundedAmount);
+			if(holdings.getTotalStocks()<=0 || holdings.getInvestedAmount()<=0) {
+				throw new NullPointerException("Some Thing Went wrong");
+			}
+		}else {
+			error +=1;
+			throw new StockException("Some Thing Went wrong");
+		}
+		/*
+		 * 6
+		 * Updating Bank account balance
+		 * 
+		 */
+			String bankMessage ="Buying "+Quantity+" of"+stockName+" Value "+investedAmount+" taxes"+Buyingtaxes;
+			PaymentMethod type = BankAccount.PaymentMethod.STOCKBUY;
+			BankAccount bankAccount =this.balanceService.withDraw(investedAmount+Buyingtaxes, bankMessage, type);
+			
+			if(bankAccount == null) {
+				error+=1;
+				throw new NullPointerException("Unable to process payment");
+			}
+		
+		/*
+		 * 7
+		 * uploading Data
+		 */
+		if(error==0) {
+			try {
+				
+				Holdings holdings1 = this.holdingesRepository.save(holdings);
+				if(holdings1 != null) {
+					
+					String alertName = "STOCK BUY";
+					String alertmessage = "Buying "+Quantity+ "stocks in "+holdings1.getStockName()+" at "+holdings1.getStockBuyingkPrise()
+												+" invested amount "+holdings1.getInvestedAmount();
+					Alert.Seen seen = Alert.Seen.UNSEEN;
+					
+					Alert alert = new Alert(alertName, alertmessage, seen);
+					
+					this.alertService.addAlert(alert);
+				}
+				return holdings1;
+			}catch(DataIntegrityViolationException e) {
+				
+				throw new DataIntegrityViolationException("Server not responding. Can't process at this time.");
+			}
+		}else {
+			throw new StockException("Some Thing Went wrong");
+		}
+	}
+	
+	
+	//----------------------------------Adding Extra Quantity------------------------------------//
+	
+	/*
+	 * 3
+	 * process
+	 * Service method for Adding extra quantity 
+	 * 	-->3.1 fetching data from user input
+	 * 	-->3.2 searching stock in holdings
+	 *  -->3.3 Copying all user data into buyStocksQuantity object 
+	 *  -->3.4 saving buyStocksQuantity object in holdings object
+	 *  -->3.5 updating the the dashBoard
+	 *  -->3.6 Payments
+	 *  -->3.7 saving holdings data
+	 *  -->3.8 alerts
+	 */
+	public Holdings extraQuantity(QuantityBuyorSell quantityBuyorSell) throws StockException, AmountException{
+
+		try {
+			
+			/*
+			 * 3.1 fetching data from user input
+			 * 		-->3.1.2 calculation investment price
+			 */
+			long stockId = quantityBuyorSell.getStockId() ;
+			String stockName = quantityBuyorSell.getStockName();
+			double taxes= quantityBuyorSell.getTaxes();
+			double brockerage = quantityBuyorSell.getBrokerage();
+			
+				/*
+				 * -->3.1.1
+				 * 
+				 */
+			BigDecimal quantity = new BigDecimal(String.valueOf(quantityBuyorSell.getQuantity()));
+			BigDecimal buyOrSellPrise =  new BigDecimal(String.valueOf(quantityBuyorSell.getBuyOrSellPrise()));
+			
+				/*
+				 * -->3.1.2
+				 */
+			BigDecimal  investedOrRelesedAmount = quantity .multiply(buyOrSellPrise);
+			
+			if(stockId <=0 || stockName == null || quantity == null|| taxes <0 || buyOrSellPrise == null) {
+	
+				throw new NullPointerException("Invalid Input. Empty filde");
+			}
+			
+		
+			/*
+			 * -->3.2 searching stock in holdings
+			 * 		-->3.2.1 passing existing total stocks and amount into BigDecimal object
+			 */
+			Optional<Holdings> quantityBuyorSell1 = this.holdingesRepository.findByIdandName(stockId, stockName);
+			if(quantityBuyorSell1.isEmpty()) {
+				throw new StockException("No stock is prsesnt at this month or stock is unsold");
+			}
+			Holdings holdings = quantityBuyorSell1.get();
+			
+			/*
+			 * -->3.2.1
+			 */
+			BigDecimal totalExistingInvestedAmount =  new BigDecimal(String.valueOf(holdings.getInvestedAmount()));
+			BigDecimal totalExistingStocks = new BigDecimal(String.valueOf(holdings.getTotalStocks()));
+			
+			/*
+			 * 
+			 * 3.3 Copying all user data into buyStocksQuantity class
+			 */
+			BuyStockQuantity buyStockQuantity = new BuyStockQuantity();
+			buyStockQuantity.setQuantity(quantity.intValue());
+			buyStockQuantity.setTaxes(taxes);
+			buyStockQuantity.setBuyingPrise(buyOrSellPrise.doubleValue());
+			buyStockQuantity.setInvestedAmount(investedOrRelesedAmount.doubleValue());
+			buyStockQuantity.setBrokerage(brockerage);
+			
+			/*
+			 * 
+			 *  -->3.4 saving buyStocksQuantity object in holdings object
+			 */
+			holdings.getBuyingquantity().add(buyStockQuantity);
+			
+			
+			/*
+			 * 
+			 * -->3.5 updating the the dashBoard
+			 * 		-->3.5.1 updating buying price
+			 * 		-->3.5.2 saving buying price
+			 * 		-->3.5.3 saving total quantity
+			 * 		-->3.5.4 adding invested amount to existing amount in dashBoard
+			 */
+			holdings.setCurrentPrise(buyOrSellPrise.doubleValue());
+			
+			
+			/*
+			 * -->3.5.1
+			 * 			        	netCost
+			 * averaePrice = -------------------------
+			 * 						total No.Of stocks
+			 * 
+			 */
+			BigDecimal amount1 = totalExistingInvestedAmount;
+			BigDecimal amount2 = investedOrRelesedAmount;
+			BigDecimal netCost = amount1.add(amount2);
+				
+				//total stocks
+			BigDecimal totalNoOfStocks = totalExistingStocks.add(quantity);
+			
+			BigDecimal averagePrice = netCost.divide(totalNoOfStocks,2,RoundingMode.HALF_UP);
+			
+			
+				/*
+				 * -->3.5.2 
+				 */
+			holdings.setStockBuyingkPrise(averagePrice.doubleValue());
+				/*
+				 * -->3.5.3 
+				 */
+			holdings.setTotalStocks(totalNoOfStocks.intValue());
+			
+			
+				/*
+				 * -->3.5.4
+				 */
+			BigDecimal totalAmount = averagePrice.multiply(totalNoOfStocks) ;
+			
+			holdings.setInvestedAmount(totalAmount.doubleValue());
+			/*
+			 * -->Payment 
+			 * 	UNCOMMENT AFTER ALLSOCK UPLOAD
+			 */
+			BigDecimal taxess = new BigDecimal(String.valueOf(taxes)); 
+			BigDecimal brockertaxes =  new BigDecimal(String.valueOf(brockerage));
+			BigDecimal amountcut = investedOrRelesedAmount.add(brockertaxes).add(taxess);
+			
+			String message = investedOrRelesedAmount+ " debited from you account for "+quantity+" stock of "+stockName;
+			
+			BankAccount payment =this.balanceService.withDraw(amountcut.doubleValue(), message, PaymentMethod.STOCKBUY);
+			
+			
+			/*
+			 * 
+			 * -->3.7 saving holdings data
+			 */
+			
+			if(payment != null) {
+				Holdings hold= this.holdingesRepository.save(holdings);
+				
+				/*
+				 * -->3.8 alert
+				 */
+				String alertName = "STOCK BUYING";
+				String alertmessage = "BUYING "+quantity+" of "+stockName+" at price "+hold.getCurrentPrise();
+				Alert.Seen seen = Alert.Seen.UNSEEN;
+				
+				Alert alert = new Alert(alertName, alertmessage, seen);
+				
+				 alert =this.alertService.addAlert(alert);
+				 
+				 return hold;
+				
+			}else {
+				throw new AmountException("Payment Fail");
+			}
+			
+		}catch(DataIntegrityViolationException e) {
+	
+			throw new DataIntegrityViolationException("Can't process the data");
+		}
+		
+	}
+	/*
+	 * 3
+	 * process
+	 * Service method for selling quantity 
+	 * 	-->4.1 fetching data from user input
+	 * 	-->4.2 searching stock in holdings
+	 *  -->4.3 Checking selling stock is present in holdings 
+	 *  -->4.4 Copying all data into sellStocksQuantity object.
+	 *  -->4.5 saving sellStocksQuantity object in holdings object
+	 *  -->4.6 updating the the dashBoard
+	 *  -->4.7 Payments
+	 *  -->4.8 saving holdings data
+	 *  -->4.8 alerts
+	 */
+	public Holdings SellStocks(QuantityBuyorSell quantityBuyorSell)throws StockException, AmountException{
+		try {
+			
+			/*
+			 * 4.1 fetching data from user input
+			 * 		-->4.1.1 Assign to the bigDecimal for calculation
+			 * 		-->4.1.2 calculation investment price
+			 */
+			long stockId = quantityBuyorSell.getStockId() ;
+			String stockName = quantityBuyorSell.getStockName();
+			BigDecimal taxes= new BigDecimal(String.valueOf(quantityBuyorSell.getTaxes()));
+			BigDecimal brockerage = new BigDecimal(String.valueOf(quantityBuyorSell.getBrokerage()));
+			
+				/*
+				 * -->4.1.1
+				 * 
+				 */
+			BigDecimal quantity = new BigDecimal(String.valueOf(quantityBuyorSell.getQuantity()));
+			BigDecimal buyOrSellPrise = new BigDecimal(String.valueOf(quantityBuyorSell.getBuyOrSellPrise()));
+			//releasing amount
+			BigDecimal RelesedAmount = buyOrSellPrise.multiply(quantity);
+			
+				/*
+				 * -->4.1.2
+				 */
+			BigDecimal  investedOrRelesedAmount = quantity.multiply(buyOrSellPrise);
+			
+			
+			if(stockId <=0 || stockName == null || quantity == null|| taxes ==null || buyOrSellPrise == null) {
+	
+				throw new NullPointerException("Invalid Input. Empty filde");
+			}
+			
+			
+			/*
+			 * -->4.2 searching stock in holdings
+			 * 		
+			 */
+			Optional<Holdings> quantityBuyorSell1 = this.holdingesRepository.findByIdandName(stockId, stockName);
+			if(quantityBuyorSell1.isEmpty()) {
+				throw new StockException("No stock is prsesnt at this month or stock is already sold");
+			}
+			Holdings holdings = quantityBuyorSell1.get();
+			BigDecimal totalExistingStocks = new BigDecimal(String.valueOf(holdings.getTotalStocks()));
+			BigDecimal investementedAmount = new BigDecimal(String.valueOf(holdings.getInvestedAmount()));
+			/*
+			 *  -->4.3 Checking selling stock is present in holdings 
+			 */
+			if(totalExistingStocks.intValue()< quantity.intValue() || quantity.intValue() <=0 ) {
+				throw new StockException("Selling Invalid Quantity");
+			}
+
+			/*
+			 * 
+			 * 4.4 Copying all user data into buyStocksQuantity class
+			 */
+			SellStockQuantity sellStockQuantity = new SellStockQuantity();
+			sellStockQuantity.setQuantity(quantity.intValue());
+			sellStockQuantity.setTaxes(taxes.doubleValue());
+			sellStockQuantity.setSellingPrise(buyOrSellPrise.doubleValue());
+			sellStockQuantity.setRelesedamount(investedOrRelesedAmount.doubleValue());
+			sellStockQuantity.setBrokerage(brockerage.doubleValue());
+			
+			/*
+			 * -->4.5 saving sellStocksQuantity object in holdings object
+			 */
+			holdings.getSellingquantity().add(sellStockQuantity);
+			
+			
+			/*
+			 * -->4.6 updating the the dashBoard.
+			 * 		-->4.6.1 updating current price.
+			 * 		-->4.6.2 updating total stocks
+			 * 		-->4.6.3 updating investing amount after selling stock
+			 * 		-->4.6.4 updating total selling stocks.
+			 * 		-->4.6.5 updating released amount
+			 * 		-->4.6.6 status
+			 * 		-->4.6.7 setting average price
+			 */	
+			
+				/*
+				 * -->4.6.1 updating current price.
+				 */
+			holdings.setCurrentPrise(buyOrSellPrise.doubleValue());
+			
+				/*
+				 * -->4.6.2 updating total stocks
+				 */
+			BigDecimal presenttotalStocks = totalExistingStocks.subtract(quantity);
+			holdings.setTotalStocks(presenttotalStocks.intValue());
+				/*
+				 * -->4.6.3 updating investing amount after selling stock
+				 */
+			BigDecimal investedAmount = buyOrSellPrise.multiply(presenttotalStocks);
+			holdings.setInvestedAmount(investedAmount.doubleValue());
+				/*
+				 * -->4.6.4 updating total selling stocks.
+				 */
+			BigDecimal existingTotalSoldStocks = new BigDecimal(String.valueOf(holdings.getTotalSoldStocks()));
+			BigDecimal totalSoldStocks = existingTotalSoldStocks.add(quantity);
+			holdings.setTotalSoldStocks(totalSoldStocks.intValue());
+				/*
+				 * -->4.6.5 updating released amount
+				 */
+			BigDecimal exestingrelesedAmount = new BigDecimal(String.valueOf(holdings.getTotalReleasedAmount()));
+			BigDecimal totalRelesedAmount = (RelesedAmount).add(exestingrelesedAmount).subtract(taxes).subtract(brockerage);
+			holdings.setTotalReleasedAmount(totalRelesedAmount.doubleValue());
+			
+				/*
+				 * -->4.6.6 status
+				 */
+			if(presenttotalStocks.intValue() == 0) {
+				holdings.setStatus(Holdings.Status.SOLD);
+			}
+				/*
+				 * -->4.6.7 setting average price
+				 * 
+				 * 		        		netCost
+				 * averaePrice = -------------------------
+				 * 					total No.Of stocks
+				 */
+			BigDecimal netcost =null;
+			if(investementedAmount.doubleValue() >= RelesedAmount.doubleValue()) {
+				
+				netcost = investementedAmount.subtract(RelesedAmount);
+			}else {
+				netcost = RelesedAmount.subtract(investementedAmount);
+			}
+			if(presenttotalStocks.intValue() > 0) {
+				BigDecimal averageCost= netcost.divide(presenttotalStocks, 2, RoundingMode.HALF_UP);
+				holdings.setStockBuyingkPrise(averageCost.doubleValue());
+			}else {
+				holdings.setStockBuyingkPrise(0);
+			}
+			
+			/*
+			 *  -->4.7 Payments
+			 */
+			BankAccount bankAccount = new BankAccount();
+			bankAccount.setPaymentType(PaymentMethod.STOCKSELL);
+			bankAccount.setDeposit(totalRelesedAmount.doubleValue());
+			String message = totalRelesedAmount.doubleValue()+" credited to your account by selling "+quantity.intValue()+" stocks of "+stockName;
+			bankAccount.setMessage(message);
+			BankAccount amountDeposit = this.balanceService.addbalance(bankAccount);
+			
+			if(amountDeposit != null) {
+				
+				Holdings hold = this.holdingesRepository.save(holdings);
+				
+				if(hold != null) {
+					/*
+					 * -->4.8 alerts
+					 * 
+					 */
+					String alertName = "STOCK SELLING";
+					Alert.Seen seen = Alert.Seen.UNSEEN;
+					String alertmessage = "SELLING "+quantity+" of "+stockName+" at price "+hold.getCurrentPrise();
+					Alert alert = new Alert(alertName, alertmessage, seen);
+					alert =this.alertService.addAlert(alert);
+					
+					return hold;
+				}else {
+					throw new StockException("Some thing went wrong.");
+				}
+			}else {
+				throw new StockException("Can't process at this moment.");
+			}
+			
+		}catch(DataIntegrityViolationException e) {
+			
+			throw new DataIntegrityViolationException("Can't process at this time");
+		}
+	}
+
+	
+	
+	/*
+	 * 
+	 * service method for calculating the monthly profit
+	 */
+	public List<MonthProfitPojo> monthlyProfit() throws CalandarException {
+		
+		try {
+			List<YearAndMonth> yearMonth1 = this.yearAndMonthService.getYearMonth();
+			
+			 List<MonthProfitPojo> profits = new ArrayList<>();
+			 
+			for(int i=0; i<yearMonth1.size(); i++) {
+				
+				List<YearAndMonth> months = this.yearAndMonthService.findyearmonth(yearMonth1.get(i).getYearMonthName());
+				
+				long id= months.get(0).getId();
+				
+				String monthname = months.get(0).getYearMonthName();
+				
+				Double profitamount= this.holdingesRepository.findProfitByMonth(id);
+
+				 MonthProfitPojo monthProfitPojo = new MonthProfitPojo(id, monthname, profitamount);
+			
+				 profits.add(monthProfitPojo);
+			}
+			 
+			profits.sort(Comparator.comparingLong(MonthProfitPojo::getId).reversed());
+			
+			return profits;
+			
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Can't process data");
+		}
+	}
+	
+	
+	/*
+	 * getting all stocks of month wise
+	 * 
+	 */
+	public List<Holdings> selectbymonth(String month) throws CalandarException,StockException {
+		
+		try {
+			
+			List<YearAndMonth> yearMonth = this.yearAndMonthService.findyearmonth(month);
+			
+			if(!yearMonth.isEmpty()) {
+				
+				YearAndMonth yAM = yearMonth.get(0);
+				
+				List<Holdings> holdings = this.holdingesRepository.findByYearMonth(yAM);
+				
+				if(!holdings.isEmpty()) {
+					return holdings;
+				}else {
+					throw new StockException("Updata data for this month");
+				}	
+			}else {
+				throw new CalandarException("Invalid Month");
+			}
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Server not responding.");
+		}
+	}
+	
+	
+	
+	
+	//-------------------------------------- Updating Stocks current price --------------------------------------------
+	/*
+	 * 5 Service method for updating stocks in a month
+	 * 
+	 * 5 process
+	 * 		-->5.0 checking last month calendar.
+	 * 		-->5.1 checking updating month
+	 * 		-->5.2 searching stock :- Searching stocks in last month by [id, stock name, year month id]
+	 * 		-->5.3 Copying data from database if data is present in last month(holdingsLM object) to new month(new)
+	 */
+	public Holdings updateCrrPrice(UpDateCrrPrice upDateCrrPrice) throws StockException, CalandarException {
+		
+		long id =upDateCrrPrice.getId();
+		String stockName = upDateCrrPrice.getStockName();
+		double currentPrice = upDateCrrPrice.getCurrentPrice();
+		long monthYearId = upDateCrrPrice.getMonthYearId();
+		
+		if(id<= 0|| stockName ==null || monthYearId<=0) {
+			throw new NullPointerException("Incomplete fields");
+		}
+		
+		try
+		{	
+			/*
+			 * -->5.0 checking last month calendar.
+			 */
+			Optional<YearAndMonth> lastmonthcalander = this.yearAndMonthService.getById(monthYearId);
+			
+			/*-->5.1
+			 * 	checking updating month
+			 */
+			String monthyear = this.date();
+			List<YearAndMonth> yearmonth = this.yearAndMonthService.findyearmonth(monthyear);
+			long yearMonthId =yearmonth.get(0).getId();
+			if(yearMonthId != monthYearId+1) {
+				throw new StockException("You Can't update "+lastmonthcalander.get().getYearMonthName()+" month stock data");
+			}
+			/*-->5.2 
+			 * 		searching stocks
+			 * 
+			 */
+			Optional<Holdings> lastMonthData =  this.holdingesRepository.findByIdStockNameAndStatusAndMonth(id, stockName, monthYearId);
+			if(lastMonthData.isEmpty()) {
+				throw new StockException("No "+stockName+" in " +lastmonthcalander.get().getYearMonthName() +" month or sold");
+			}
+
+			
+			/*-->5.3 
+			 * 		-->5.3.1 last month Object
+			 * 		-->5.3.2 new month Object
+			 * 		-->5.3.3 coping data from last month object to new month object
+			 */
+			
+				/*
+				 * -->5.3.1 last month Object
+				 */
+			Holdings  holdingsLM = lastMonthData.get();
+				/*
+				 * -->5.3.2 new month Object
+				 */
+			Holdings holdingsNM = new Holdings();
+				/*
+				 * -->5.3.3 coping data from last month object to new month object
+				 */
+			holdingsNM.setStockName(holdingsLM.getStockName()); 
+			holdingsNM.setTotalStocks(holdingsLM.getTotalStocks());
+			//buying list
+			List<BuyStockQuantity> buyingquantity = new ArrayList<>();
+			buyingquantity.addAll(holdingsLM.getBuyingquantity());
+			holdingsNM.setBuyingquantity(buyingquantity);
+			holdingsNM.setStockBuyingkPrise(holdingsLM.getStockBuyingkPrise());
+			holdingsNM.setInvestedAmount(holdingsLM.getInvestedAmount());
+			holdingsNM.setCurrentPrise(currentPrice);
+			//selling list
+			List<SellStockQuantity> sellingquantity = new ArrayList<>();
+			sellingquantity.addAll(holdingsLM.getSellingquantity());
+			holdingsNM.setSellingquantity(sellingquantity);
+			holdingsNM.setYearMonth(yearmonth.get(0));
+			
+			holdingsNM= this.holdingesRepository.save(holdingsNM);
+			
+			if(holdingsNM != null) {
+				String alertName = "Stock Update";
+				Alert.Seen seen = Alert.Seen.UNSEEN;
+				String alertmessage = "Updated "+stockName+" current price to "+ currentPrice+ " for "+yearmonth.get(0).getYearMonthName()+" month";
+				Alert alert = new Alert(alertName, alertmessage, seen);
+				alert =this.alertService.addAlert(alert);
+				return holdingsNM;
+			}else {
+				throw new StockException("Some thing went wrong");
+			}
+			
+			
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Can't process at this time");
+		}
+	}
+	
+	//data
+	public String date() {
+		LocalDate date1 = LocalDate.now();
+		
+		return date1.getYear()+" "+date1.getMonth();
+	}
+
+	/*
+	 * service method for getting stocks by id;
+	 * 
+	 */
+	public Holdings getStockById(long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	
+	/*
+	 * 6 Calculating profits and investment in month
+	 * 		-->6.1 checking month name
+	 * 		-->6.2 getting data from database with month id for investment and profits
+	 */
+	public ProfitDetails getProfitDetails(String monthName) throws CalandarException {
+		
+		try {
+			/*
+			 * -->6.1 checking month name
+			 */
+			List<YearAndMonth> yearAndMonth  =this.yearAndMonthService.findyearmonth(monthName);
+			long month_id = yearAndMonth.get(0).getId();
+			/*
+			 * -->6.2 getting data from database with month id
+			 */
+			double scale = Math.pow(10, 2);
+			double profit = this.holdingesRepository.findProfitByMonth(month_id);
+			profit= Math.round(profit * scale)/scale;
+			
+			double investmentamount = this.holdingesRepository.totalInvestmentsBymonth(month_id);
+			investmentamount = Math.round(investmentamount * scale)/scale;
+			 
+			return new ProfitDetails(profit,investmentamount);
+			
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Can't process at this time try again..");
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

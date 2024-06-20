@@ -1,0 +1,23 @@
+package com.stock.calculation.pojo;
+
+import java.math.BigDecimal;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+public class ProfitDetails {
+	
+	private BigDecimal  profit;
+	private BigDecimal investementAmount; 
+	
+	public ProfitDetails(BigDecimal profit, BigDecimal investementAmount) {
+		// TODO Auto-generated constructor stub
+		
+		this.profit=profit;
+		this.investementAmount =investementAmount;
+	}
+	public ProfitDetails() {}
+
+}

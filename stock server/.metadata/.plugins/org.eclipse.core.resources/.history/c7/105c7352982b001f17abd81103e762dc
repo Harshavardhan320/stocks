@@ -1,0 +1,127 @@
+package com.stock.calculation.service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import com.stock.calculation.entitys.Alert;
+import com.stock.calculation.entitys.YearAndMonth;
+import com.stock.calculation.exception.CalandarException;
+import com.stock.calculation.repository.YearAndMonthRepo;
+
+@Service
+public class YearAndMonthService {
+	/*
+	 * 1
+	 * Injecting YearMonth repository method
+	 */
+	@Autowired
+	YearAndMonthRepo YearAndMonthRepo;
+	/*
+	 * 2
+	 * Auto injecting alert service
+	 * 
+	 */
+	@Autowired
+	AlertService alertService;
+
+	/*
+	 * 1 service method for adding month and year
+	 */
+	public YearAndMonth updateMonth(YearAndMonth YearMonth) throws CalandarException {
+		
+		String YearMonthName = YearMonth.getYearMonthName();
+		try {
+			List<YearAndMonth> exestingDate = this.YearAndMonthRepo.findByYearMonthName(YearMonthName);
+			if(exestingDate.isEmpty()) {
+				
+					YearAndMonth yearMonth = this.YearAndMonthRepo.save(YearMonth);
+					String alertName = "MONTHLY UPDATE";
+					String alertmessage = yearMonth.getYearMonthName()+" Added to you dashboard you can update your stocks data.";
+					Alert.Seen seen = Alert.Seen.UNSEEN;
+					
+					Alert alert = new Alert(alertName, alertmessage, seen);
+					
+					this.alertService.addAlert(alert);
+					return yearMonth;
+				
+			}else {
+				return YearMonth;
+			}
+		}catch(DataIntegrityViolationException e) {
+			
+			throw new DataIntegrityViolationException("Server not responding.");
+		}
+	}
+	/*
+	 * 2
+	 * service method for finding year month
+	 */
+	public List<YearAndMonth> findyearmonth(String yearMonth) throws  CalandarException{
+		try {
+			List<YearAndMonth> exestingDate = this.YearAndMonthRepo.findByYearMonthName(yearMonth);
+			
+			if(!exestingDate.isEmpty()) {
+				return exestingDate;
+			}else {
+				throw new CalandarException("No year month found"); 
+			}
+			
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Server not responding.");
+			
+		}
+	}
+	/*
+	 * 3
+	 * getting all months
+	 */
+	public List<YearAndMonth> getYearMonth() {
+		List<YearAndMonth> list = this.YearAndMonthRepo.findAll();
+		return list;
+	}
+	/*
+	 * 4
+	 * find by id
+	 */
+	public Optional<YearAndMonth> getById(long id) throws CalandarException{
+		try {
+			Optional<YearAndMonth>  yearAndMonth = this.YearAndMonthRepo.findById(id);
+			
+			if(yearAndMonth.isPresent()) {
+				return yearAndMonth;
+			}else {
+				throw new CalandarException("No year month found.");
+			}
+			
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("server not responding.");
+		}
+	}
+	
+	
+	/*
+	 * 5
+	 * getting present year and month id;
+	 */
+	public long getYearAndMonthId() throws CalandarException {
+		
+		String months[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", 
+		                   "October", "November", "December"};
+		
+		LocalDate date = LocalDate.now();
+		
+		int year =date.getYear();
+		int month = date.getMonthValue();
+		
+		String yearMonth = year+" "+months[month-1];
+		
+		List<YearAndMonth> yearMonthDetails = this.findyearmonth(yearMonth);
+		
+		return yearMonthDetails.get(0).getId();
+	}
+}

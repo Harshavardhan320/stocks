@@ -1,0 +1,11 @@
+1717375776176	Rename type 'Entity'
+1717381557725	Rename type 'Balance'
+1717479488651	Delete element
+1717479492982	Delete element
+1717480403826	Rename type 'StockQuantity'
+1717484379032	Delete element
+1717484396619	Rename type 'BuyStockQuantity'
+1717733851116	Move compilation unit
+1717734737338	Rename type 'YearMonth'
+1717734882063	Rename type 'YearMonth1'
+1717735060362	Rename type 'UpdateMonth'

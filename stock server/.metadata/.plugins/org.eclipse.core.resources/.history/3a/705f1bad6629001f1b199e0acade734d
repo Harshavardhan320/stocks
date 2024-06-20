@@ -1,0 +1,9 @@
+package com.stock.calculation.pojo;
+
+public class ProfitDetails {
+
+	public ProfitDetails() {
+		// TODO Auto-generated constructor stub
+	}
+
+}

@@ -1,0 +1,29 @@
+package com.stock.calculation.pojo;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+public class MonthProfitPojo {
+
+//	private long id;
+	private String monthName;
+	private double profit;
+	private double investmentAmount;
+	
+	public MonthProfitPojo(long id, String mothName, double profit) {
+
+//		this.id=id;
+		this.monthName = mothName;
+		this.profit = profit;
+	}
+	public MonthProfitPojo(long id, String mothName, double profit,double investmentAmount) {
+
+//		this.id=id;
+		this.monthName = mothName;
+		this.profit = profit;
+		this.investmentAmount = investmentAmount;
+	}
+	public MonthProfitPojo() {}
+}

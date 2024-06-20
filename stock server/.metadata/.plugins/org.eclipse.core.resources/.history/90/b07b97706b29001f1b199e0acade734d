@@ -1,0 +1,8 @@
+package com.stock.calculation.pojo;
+
+public interface ProfitDetails {
+	
+	 double profit();
+	 double investementAmount(); 
+
+}
