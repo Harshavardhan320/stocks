@@ -1,14 +1,3 @@
-<div class="containar-lg">
-      <div class="row">
-            <div class="col">
-                 <div class="{{class}}">
-                        <p>{{message}}</p>
-                 </div>
-            </div>
-            <div class="col"></div>
-            <div class="col"></div>
-      </div>
-</div>
 <div class="containar-lg m-3">
       <div class="card rounded">
             <div class="card-hearder bg-light p-4">
@@ -30,18 +19,18 @@
             <div class="card-body">
                   <div class="overflow-auto position-relative">
                         <table class="table table-striped ">
-                              <thead class="bg-success position-sticky fixed-top">
+                              <thead class="bg-success position-sticky fixed-top text-light">
                                     <th class="p-2 card-text">Stock name</th>
-                                    <th class="p-2 card-text">Quantity</th>
+                                    <th class="p-2 card-text">Stock Quantity</th>
                                     <th class="p-2 card-text">Invested Rs/-</th>
                                     <th class="p-2 card-text">Buying price</th>
                                     <th class="p-2 card-text">Crr price</th>
                                     <th class="p-2 card-text">Points gained</th>
-                                    <th class="p-2 card-text">profit</th>
+                                    <th class="p-2 card-text">Stock Profit</th>
                                     <th class="p-2 card-text">Sold stocks</th>
                                     <th class="p-2 card-text">Relesed Rs/-</th>
-                                    <th class="p-2 card-text">Status</th>
-                                    <th class="p-2"  *ngIf="openbuyorsall">Buy/Sell</th>
+                                    <th class="p-2 card-text">Stock Status</th>
+                                    <th class="p-2"  *ngIf="openbuyorsall">Stock Buy/Sell</th>
                               </thead>
                               <tbody class="card-body text-center">
                                     <tr>
@@ -168,7 +157,7 @@
                                                       <tr>
                                                             <th>taxes + brockerage</th>
                                                             <td><b>:</b></td>
-                                                            <td>&nbsp;{{i.taxes + i.brokerage}}</td>
+                                                            <td>&nbsp;{{(i.taxes + i.brokerage).toFixed(2)}}</td>
                                                       </tr>
                                                       <tr>
                                                             <th>Date</th>

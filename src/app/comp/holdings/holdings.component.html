@@ -9,7 +9,7 @@
                         <p  style="color: rgb(38, 134, 8);" *ngIf="profit > 0"><b>Profit : {{profit.toFixed(2)}}</b></p>
                   </div>
                   <div class="col">
-                        <p><b>Invested Amount : {{investmentAmount}}</b></p>
+                        <p><b>Invested Amount : {{(investmentAmount).toFixed(2)}}</b></p>
                   </div>
            </div>
             <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
@@ -27,7 +27,7 @@
       <div class="card-body">
             <div class="tab-content" id="myTabContent">
                   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <div class="overflow-auto position-relative" style="height: 410px;" *ngIf="unsold != null" >
+                        <div class="overflow-auto position-relative" style="height: 360px;" *ngIf="unsold != null" >
                               <table class="table table-striped ">
                                     <thead class="bg-success position-sticky fixed-top">
                                           <th class="p-2 card-text">Stock name</th>

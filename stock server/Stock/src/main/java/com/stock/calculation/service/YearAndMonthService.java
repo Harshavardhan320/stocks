@@ -1,6 +1,7 @@
 package com.stock.calculation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,7 +70,7 @@ public class YearAndMonthService {
 			if(!exestingDate.isEmpty()) {
 				return exestingDate;
 			}else {
-				throw new CalandarException("No year month found 1"); 
+				return new ArrayList<>(); 
 			}
 			
 		}catch(DataIntegrityViolationException e) {

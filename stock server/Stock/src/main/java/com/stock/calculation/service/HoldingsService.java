@@ -9,12 +9,14 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.stock.calculation.business.ProfitAndLossAnalysis;
 import com.stock.calculation.entitys.Alert;
 import com.stock.calculation.entitys.BankAccount;
 import com.stock.calculation.entitys.BankAccount.PaymentMethod;
@@ -27,6 +29,7 @@ import com.stock.calculation.exception.AmountException;
 import com.stock.calculation.exception.CalandarException;
 import com.stock.calculation.exception.StockException;
 import com.stock.calculation.pojo.MonthProfitPojo;
+import com.stock.calculation.pojo.ProfitAndLoss;
 import com.stock.calculation.pojo.ProfitDetails;
 import com.stock.calculation.pojo.UpDateCrrPrice;
 import com.stock.calculation.repository.HoldingesRepository;
@@ -614,9 +617,6 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Can't process at this time");
 		}
 	}
-
-	
-	
 	/*
 	 * 
 	 * service method for calculating the monthly profit
@@ -651,8 +651,6 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Can't process data");
 		}
 	}
-	
-	
 	/*
 	 * getting all stocks of month wise
 	 * 
@@ -683,10 +681,6 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Server not responding.");
 		}
 	}
-	
-	
-	
-	
 	//-------------------------------------- Updating Stocks current price --------------------------------------------
 	/*
 	 * 5 Service method for updating stocks in a month
@@ -707,6 +701,7 @@ public class HoldingsService {
 		double currentPrice = upDateCrrPrice.getCurrentPrice();
 		long holdingsmonthYearId = upDateCrrPrice.getMonthYearId();
 		
+		
 		if(id<= 0|| stockName ==null || holdingsmonthYearId<=0) {
 			throw new NullPointerException("Incomplete fields");
 		}
@@ -717,15 +712,15 @@ public class HoldingsService {
 			 * -->5.0 checking last month calendar.
 			 */
 			Optional<YearAndMonth> lastmonthcalander = this.yearAndMonthService.getById(holdingsmonthYearId);
-			
+		
 			/*-->5.1
 			 * 	checking updating month
 			 */
 			String monthyear = this.date();
 			List<YearAndMonth> yearmonth = this.yearAndMonthService.findyearmonth(monthyear);
-			long yearMonthId =yearmonth.get(0).getId();
-			if(yearMonthId != holdingsmonthYearId+1 && yearMonthId != holdingsmonthYearId  ) {
-				throw new StockException("You Can't update "+lastmonthcalander.get().getYearMonthName()+" month stock data");
+			
+			if(yearmonth.get(0).getStatus().toString() == "UPDATED") {
+				throw new StockException("Status of "+lastmonthcalander.get().getYearMonthName()+" already updated");
 			}
 			/*-->5.2 
 			 * 		searching stocks
@@ -775,10 +770,18 @@ public class HoldingsService {
 			 * 
 			 */
 			long monthid = this.yearAndMonthService.getYearAndMonthId();
-			Optional<Holdings> UpdateValue =  this.holdingesRepository.findByStockNameAndStatusAndMonth(stockName, monthid);
-			if(UpdateValue.isPresent()) {
+			
+			List<Holdings> UpdateValue =  this.holdingesRepository.findByStockNameAndMonth(stockName, monthid);
+			Holdings exestingdata = null;
+			
+			if(!UpdateValue.isEmpty()) {
 				
-				Holdings exestingdata = UpdateValue.get();
+				exestingdata = UpdateValue.get(0);
+				
+				
+				if(exestingdata.getStatus().toString() == "SOLD") {
+					throw new StockException("you can not update sold stocks");
+				}
 				exestingdata.setCurrentPrise(currentPrice);
 				
 				/*
@@ -793,7 +796,6 @@ public class HoldingsService {
 				 */
 				holdingsNM= this.holdingesRepository.save(holdingsNM);
 			}
-				
 			/*
 			 * -->5.6 sending alert
 			 */
@@ -814,7 +816,6 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Can't process at this time");
 		}
 	}
-	
 	//data
 	public String date() {
 		LocalDate date1 = LocalDate.now();
@@ -835,9 +836,6 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Can't process the server..");
 		}
 	}
-	
-	
-	
 	/*
 	 * 6 Calculating profits and investment in month
 	 * 		-->6.1 checking month name
@@ -867,7 +865,6 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Can't process at this time try again..");
 		}
 	}
-
 	/*
 	 * 7
 	 * process
@@ -877,9 +874,14 @@ public class HoldingsService {
 	 * 	-->7.4 saving user data into server object.
 	 * 
 	 */
-	public int editStockPriceduration(UpDateCrrPrice upDateCrrPrice, String duration) throws CalandarException, StockException {
+	public int editStockPriceduration(UpDateCrrPrice upDateCrrPrice, String duration, double squarOffValue) throws CalandarException, StockException {
 		
 		try {
+			
+			if(squarOffValue < 0) {
+				throw new NullPointerException("can't process the squarOF");
+			}
+			
 			/*
 			 * 	-->7.1 getting all value from user input;
 			 */
@@ -922,7 +924,7 @@ public class HoldingsService {
 			 * -->7.4 saving user data into server object.
 			 */
 			holdings.setCurrentPrise(currentPrice.doubleValue());
-			
+			holdings.setSquarOffValue(squarOffValue);
 			//saving server object into SQL server
 			this.holdingesRepository.save(holdings);
 			
@@ -935,41 +937,35 @@ public class HoldingsService {
 			throw new DataIntegrityViolationException("Can't process forther..");
 		}
 	}
-	
-	
 	/*
 	 * 
 	 * service method for data analysis 
 	 */
+	
+	public Map<String, ProfitAndLoss> getAnalysis() throws CalandarException {
+
+		ProfitAndLossAnalysis analysis = new ProfitAndLossAnalysis();
+		
+		try {
+			
+			String monthname = this.date();
+			
+			List<YearAndMonth> monthdata = yearAndMonthService.findyearmonth(monthname);
+			
+			List<Holdings> holdings = this.holdingesRepository.findByYearMonth(monthdata.get(0));
+			
+			analysis.monthlyAnalysis(holdings);
+			
+			Map<String, ProfitAndLoss> values = analysis.getAnalysisdata();
+			
+			
+			return values;
+			
+		}catch(DataIntegrityViolationException e) {
+			
+			throw new DataIntegrityViolationException("Can't process forther..");
+		}
+
+		
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

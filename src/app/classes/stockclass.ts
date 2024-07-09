@@ -12,6 +12,7 @@ export class Stockclass {
             let year = date.getFullYear();
             return year +" "+this.months[month];
       }
+      
       public getLastYearmonth():any{
             let date  = new Date();
             let lastmonth = date.getFullYear()+1+" "+this.months[0];

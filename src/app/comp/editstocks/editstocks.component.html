@@ -11,47 +11,45 @@
             <div class="card-header {{subclass}}">
                   <h2>{{submessage}}</h2>
             </div>
-            <div class="card-body overflow-auto rounded" style="height: 390px;">
-                  <div *ngFor="let i of holdingsDate" class="bg-light ">
-                        <form #updatestockduration="ngForm" (ngSubmit)="updatestocks(updatestockduration)">
-                              <input type="hidden" readony name="monthYearId" [(ngModel)] = "i.yearMonth.id" readonly style="border:none" class="bg-light p-2">
-                              <div class="row mb-3">
-                                    <div class="col-1">
-                                          (Q{{i.totalStocks}})<input type="number" readony name="id" [(ngModel)] = "i.id" readonly style="border:none" class="bg-light p-2">
-                                    </div>
-                                    <div class="col-2">
-                                          <input type="text" class="form-control" [(ngModel)]="i.stockName" readonly name="stockName" style="border:none" class="bg-light p-2">
-                                    </div>
-                                    <div class="col-2">
-                                          <input type="number" class="form-control bg-light p-2" [(ngModel)]="i.currentPrise"  style="border:none" name="currentPrice"
-                                                ngModel #currentPrice ="ngModel" required
-                                          >
-                                          <div class="text-danger" *ngIf="currentPrice.touched && currentPrice.invalid">
-                                                <span *ngIf="currentPrice.errors?.['required']">Please enter current price</span>
-                                          </div>
-                                    </div>
-                                    <div class="col">
-                                         <div class="row">
-                                                <div class="col-sm-6">
-                                                      <div class="form-group">
-                                                           <span class="fs-6">SHOETTERM : </span><input type="radio" name="duration" [(ngModel)]="i.duration" value="SHORTTERM">
+            <div class="card-body overflow-auto rounded bg-success" style="height: 390px;">
+                  <table>
+                        <tbody>
+                              <div *ngFor="let i of holdingsDate" class="bg-light ">
+                                    <form #updatestockduration="ngForm" (ngSubmit)="updatestocks(updatestockduration)">
+                                          <input type="hidden" readony name="id" [(ngModel)] = "i.id" readonly style="border:none" class="bg-light p-2">
+                                          <input type="hidden" readony name="monthYearId" [(ngModel)] = "i.yearMonth.id" readonly style="border:none" class="bg-light p-2">
+                                          <tr class="float-start bg-light m-1 rounded text-center">
+                                                <td><input readonly name="stocks" [(ngModel)]="i.totalStocks" style="border:none;" class="bg-light p-2 text-center" type="number"></td>
+                                                <td> <input type="text" class="form-control text-center" [(ngModel)]="i.stockName" readonly name="stockName" style="border:none" class="bg-light p-2 text-center"></td>
+                                                <td>
+                                                      <input type="number" class="form-control bg-light p-2 text-center" [(ngModel)]="i.currentPrise"  style="border:none" name="currentPrice"
+                                                            ngModel #currentPrice ="ngModel" required
+                                                      >
+                                                      <div class="text-danger" *ngIf="currentPrice.touched && currentPrice.invalid">
+                                                            <span *ngIf="currentPrice.errors?.['required']">Please enter current price</span>
                                                       </div>
-                                                </div>
-                                                <div class="col-sm-6">
+                                                </td>
+                                                <td>
                                                       <div class="form-group">
-                                                         <span>LONGTERM : </span><input type="radio" name="duration" [(ngModel)]="i.duration" value="LONGTERM">
+                                                            <span class="fs-6">SHORT : </span><input type="radio" name="duration" [(ngModel)]="i.duration" value="SHORTTERM">
                                                       </div>
-                                                </div>
-                                         </div>
-                                    </div>
-                                    <div class="col text-center">
-                                          <button type="submit" [disabled]="updatestockduration.invalid" class="btn btn-primary">Edit</button>
-                                    </div>
+                                                </td>
+                                                <td>
+                                                      <div class="form-group">
+                                                            <span>LONG : </span><input type="radio" name="duration" [(ngModel)]="i.duration" value="LONGTERM">
+                                                      </div>
+                                                </td>
+                                                <td>
+                                                      <input type="number" [(ngModel)]="i.squarOffValue" required name="squarOffValue" style="border:none" class="bg-light p-2 text-center">
+                                                </td>
+                                                <td>
+                                                      <button type="submit" [disabled]="updatestockduration.invalid" class="btn btn-primary">Edit</button>
+                                                </td>
+                                          </tr>
+                                    </form>
                               </div>
-                        </form>  
-                       
-                  </div>
+                        </tbody>
+                  </table>
             </div>
       </div>
 </div>
-

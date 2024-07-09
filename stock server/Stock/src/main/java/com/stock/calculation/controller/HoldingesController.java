@@ -1,6 +1,7 @@
 package com.stock.calculation.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stock.calculation.entitys.Holdings;
 import com.stock.calculation.entitys.QuantityBuyorSell;
 import com.stock.calculation.pojo.MonthProfitPojo;
+import com.stock.calculation.pojo.ProfitAndLoss;
 import com.stock.calculation.pojo.ProfitDetails;
 import com.stock.calculation.pojo.UpDateCrrPrice;
 import com.stock.calculation.service.HoldingsService;
@@ -185,17 +187,33 @@ public class HoldingesController {
 	 * 
 	 * controller method for changing duration
 	 */
-	@PostMapping(value="/update/holdings/{duration}")
-	public ResponseEntity<?> updateHoldings(@RequestBody UpDateCrrPrice upDateCrrPrice,@PathVariable String duration){
+	@PostMapping(value="/update/holdings/{duration}/{squarOffValue}")
+	public ResponseEntity<?> updateHoldings(@RequestBody UpDateCrrPrice upDateCrrPrice,@PathVariable String duration, @PathVariable double squarOffValue){
 		try {	
 			
-			int holdings = this.holdingsService.editStockPriceduration(upDateCrrPrice, duration);
+			int holdings = this.holdingsService.editStockPriceduration(upDateCrrPrice, duration, squarOffValue);
 
 			return new ResponseEntity<>(holdings, HttpStatus.OK);
 		}catch(Exception e) {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
 		}
 	}
+	/*
+	 * 
+	 * controller method for getting percentages
+	 */
+	@GetMapping(value="/analysis")
+	public ResponseEntity<?> analysis(){
+		try {	
+			
+			Map<String, ProfitAndLoss> analysisdata = this.holdingsService.getAnalysis();
+
+			return new ResponseEntity<>(analysisdata, HttpStatus.OK);
+		}catch(Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+		}
+	}
+	
 }
 
 

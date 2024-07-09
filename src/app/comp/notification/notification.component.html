@@ -1,7 +1,14 @@
 <div class="container-lg">
       <div class="card">
-            <div class="card-header {{class}}">
-                  <h3>{{message}} &nbsp;&nbsp;<i *ngIf="notificationCount !=0">{{notificationCount}}</i></h3>
+            <div class="card-header ">
+                  <div class="row">
+                        <div class="col {{class}}">
+                              <h3>{{message}} &nbsp;&nbsp;<i *ngIf="notificationCount !=0">{{notificationCount}}</i></h3>
+                        </div>
+                        <div class="col">
+                              <button class="btn btn-primary" (click)="update()">Mark it as seen</button>
+                        </div>
+                  </div>
             </div>
             <div class="card-body overflow-auto" style="height: 450px;">
                   <table class="table table-striped">

@@ -28,18 +28,21 @@ export class UpdatestocksComponent implements OnInit{
   public stockData = new Map<string, Updatestockclass>();
   public displayStocks: Array<{key:string, value:Updatestockclass}> =[];
 
+
   constructor(private holdingsService:HoldingsService){}
 
 
   ngOnInit(): void {
-    this.class="h3 m-4";
+
+  
+    this.class="fs-4";
     this.message="UPLOAD STOCKS";
 
     let presentmonth = new Stockclass();
 
     this.holdingsService.presentmonth(presentmonth.getLastYearmonth()).subscribe({
 
-      next:(value)=>{
+      next:(value)=>{ 
         this.monthId = value[0].yearMonth.id;
         for(let i=0; i<value.length; i++){
           if(value[i].status == "UNSOLD"){
@@ -68,31 +71,59 @@ export class UpdatestocksComponent implements OnInit{
   }
 
   process() {
-    if(this.sheetvalues == null){
-      this.message="invalid or some stock where added to you holdings.";
-      this.class="h3 alert alert-warning";
-      return;
-    }
+   
 
-    if(this.sheetvalues.length != this.stockData.size){
-      this.message="invalid or some stock where added to you holdings..";
-      this.class="h3 alert alert-warning";
-      return;
-    }
-    for(let i=0; i<this.sheetvalues.length; i++){
-      let stockname = this.sheetvalues[i].Instrument;
-      let stockDetails  = this.stockData.get(stockname);
+    //feltering sold stocks
+    
+    let presentmonth = new Stockclass();
 
-      if(stockDetails != null){
-        stockDetails?.setprisentPrice(this.sheetvalues[i].LTP)
-      }else{
-        this.message="New stock where added to you holdings. Can't move forther process. Add you stocks in your holdings";
-        this.class="fs-6 alert alert-warning";
+    this.holdingsService.presentmonth(presentmonth.getYearmonth()).subscribe({
+      next:(value)=>{
+        for(let i=0; i<value.length; i++){
+          let stockname = value[i].stockName;
+          if(value[i].status == "SOLD"){
+            this.stockData.delete(stockname);
+          }
+          else if(!this.stockData.has(stockname)){
+            this.stockData.set(value[i].stockName,new Updatestockclass(value[i].id, value[i].currentPrise, 0));
+          }
+        }
+      }
+    })
+    this.class="fs-4";
+    this.message="Fetching data. please wait..";
+    setTimeout(() => {
+      this.class="fs-4";
+      this.message="UPLOAD STOCKS";
+
+      if(this.sheetvalues == null){
+        this.message="invalid or some stock where added to you holdings.";
+        this.class="h3 alert alert-warning";
         return;
       }
+    
      
-    }
-    this.displayStocks = Array.from(this.stockData.entries()).map(([key, value])=>({key, value}));
+      if(this.sheetvalues.length != this.stockData.size){
+        console.log(this.sheetvalues.length+" "+this.stockData.size)
+        this.message="invalid or some stock where added to you holdings..";
+        this.class="h3 alert alert-warning";
+        return;
+      }
+      for(let i=0; i<this.sheetvalues.length; i++){
+        let stockname = this.sheetvalues[i].Instrument;
+        let stockDetails  = this.stockData.get(stockname);
+        
+        if(stockDetails != null){
+          stockDetails?.setprisentPrice(this.sheetvalues[i].LTP)
+        }else{
+          this.message="New stock where added to you holdings. Can't move forther process. Add you stocks in your holdings";
+          this.class="fs-6 alert alert-warning";
+          return;
+        }
+      
+      }
+      this.displayStocks = Array.from(this.stockData.entries()).map(([key, value])=>({key, value}));
+    }, 4000);
   }
 
   errors(err:any){
@@ -114,13 +145,23 @@ export class UpdatestocksComponent implements OnInit{
       "currentPrice":data.value["prisentPrice"],
       "monthYearId":this.monthId
     }
+    console.log(this.monthId);
     this.holdingsService.updateCurrPrice(sendDate).subscribe({
       next:(value)=>{
-        this.submessage="Stock Price Updated to "+value.currentPrise;
-        this.subclass="text-success";
+        this.message="Stock Price Updated to "+value.currentPrise;
+        this.class="text-success";
       },error:(err)=>{
         this.errors(err);
       }
     })
+    let stock:any = this.displayStocks.find(stock=>stock.key == data.value["stockname"]);
+    let indexnumber = this.displayStocks.indexOf(stock);
+    this.displayStocks.splice(indexnumber,1);
+    setTimeout(() => {
+      this.class="fs-4";
+      this.message="UPLOAD STOCKS";
+     
+      this.ngOnInit();
+    }, 2100);
   }
 }

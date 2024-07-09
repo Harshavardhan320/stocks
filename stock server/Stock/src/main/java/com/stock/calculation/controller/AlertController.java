@@ -57,4 +57,15 @@ public class AlertController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
 		}
 	}
+	
+	@GetMapping(value="update")
+	public ResponseEntity<?>  update() {
+		try {
+			int alerts = this.alertService.updateStatus();
+			
+			return new ResponseEntity<>(alerts, HttpStatus.OK);
+		}catch(Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+		}
+	}
 }

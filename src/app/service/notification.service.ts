@@ -6,6 +6,9 @@ const url:string = "http://localhost:8080/api/";
   providedIn: 'root'
 })
 export class NotificationService {
+  update():Observable<any>{
+   return this.http.get(url+`alert/update`);
+  }
 
   constructor(private http:HttpClient) { }
 

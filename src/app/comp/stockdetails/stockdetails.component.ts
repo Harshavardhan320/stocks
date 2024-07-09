@@ -52,7 +52,7 @@ export class StockdetailsComponent implements OnInit {
           this.yearmonth.getYearMonth(month).subscribe({
             next:(value)=>{
 
-              if(value[0].id == this.holdings.yearMonth.id){
+              if(value[0].id == this.holdings.yearMonth.id && value[0].status == "UNSOLD"){
                 this.openbuyorsall = true;
               }
             },error:(err)=>{

@@ -101,6 +101,16 @@ public class AlertService {
 			throw new DataIntegrityViolationException("Server not responding.");
 		}
 	}
+	
+	public int updateStatus() {
+		
+		try {
+			this.alertRepo.updatestatus();
+			return 1;
+		}catch(DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Can't process data, server error");
+		}
+	}
 }
 
 

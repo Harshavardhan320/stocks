@@ -54,6 +54,7 @@ export class EditstocksComponent implements OnInit {
     let currentvalue:any = formdata.value["currentPrice"];
     let monthid:any = formdata.value["monthYearId"]
     let duration:any = formdata.value["duration"];
+    let squarOffValue = formdata.value["squarOffValue"];
 
    
     let data ={
@@ -62,7 +63,7 @@ export class EditstocksComponent implements OnInit {
       "currentPrice": currentvalue,
       "monthYearId":monthid
     }
-    this.holdingsService.updateCurrPriceDuration(data, duration).subscribe({
+    this.holdingsService.updateCurrPriceDuration(data, duration, squarOffValue).subscribe({
       next:(data)=>{
         this.message = data+" Stocks data updated successfully";
         this.class="fs-5 mt-3 alert alert-success";

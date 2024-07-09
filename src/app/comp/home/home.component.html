@@ -1,7 +1,4 @@
 <div class="container-lg">
-      <h4>{{message}}</h4>
-</div>
-<div class="container-lg">
       <div class="cardscroll">
             <div *ngFor="let i of yearmonthdata" class="card1">
                   <div class="card1-body">
@@ -24,16 +21,15 @@
             </div>
       </div>
 </div>
-<div class="container-lg">
-      <p><b>Note:-</b>Present month Data <span><strong>{{yearmonthdata[0]?.monthName}}  </strong></span>
-            <span *ngIf="updatestatus=='INCOMPLET'"> &#9785;</span>
-            <span  *ngIf="updatestatus=='UPDATED'">&#x263A;</span>
-      </p>
+<div class="container-lg mt-1">
       <div class="card">
             <div class="card-header {{class}}">
                   <div class="row">
                         <div class="col">
-                              <h4>{{message}}</h4>
+                              <p><b>Note:-</b>Present month Data <span><strong>{{yearmonthdata[0]?.monthName}}  </strong></span>
+                                    <span *ngIf="updatestatus=='INCOMPLET'"> &#9785;</span>
+                                    <span  *ngIf="updatestatus=='UPDATED'">&#x263A;</span>
+                              </p>
                         </div>
                         <div class="col">
                               <p><strong>Profit: </strong>
@@ -54,20 +50,20 @@
                   </div>
             </div>
             <div class="card-body">
-                  <div class="overflow-auto position-relative" style="height: 290px;">
+                  <div class="overflow-auto position-relative" style="height: 310px;">
                         <table class="table table-striped ">
-                              <thead class="bg-success position-sticky fixed-top">
-                                    <th class="p-2 card-text">Stock name</th>
-                                    <th class="p-2 card-text">Quantity</th>
+                              <thead class="bg-success position-sticky fixed-top text-light">
+                                    <th class="p-2 card-text">Stock Name</th>
+                                    <th class="p-2 card-text">Stock Quantity</th>
                                     <th class="p-2 card-text">Invested Rs/-</th>
                                     <th class="p-2 card-text">Buying price</th>
                                     <th class="p-2 card-text">Crr price</th>
                                     <th class="p-2 card-text">Points gained</th>
-                                    <th class="p-2 card-text">profit</th>
+                                    <th class="p-2 card-text">In Profit</th>
                                     <th class="p-2 card-text">Sold stocks</th>
                                     <th class="p-2 card-text">Relesed Rs/-</th>
-                                    <th class="p-2 card-text">Status</th>
-                                    <th class="p-2">Buy/Sell</th>
+                                    <th class="p-2 card-text">Stock Status</th>
+                                    <th class="p-2">Stock Buy/Sell</th>
                               </thead>
                               <tbody class="card-body text-center">
                                     <tr *ngFor="let i of holdings" class="h6">
@@ -110,7 +106,7 @@
                                           <td class="card-text" *ngIf="i.status=='SOLD'" style="color: red;">{{i.status}}</td>
                                           <td class="card-text" *ngIf="i.status=='UNSOLD'" style="color: green;">{{i.status}}</td>
                                           <td>
-                                                <div class="btn-group">
+                                                <div class="btn-group" *ngIf="i.status == 'UNSOLD'">
                                                       <a routerLink="/buyorsellstocks/{{i.id}}/BUY/{{i.stockName}}" class="btn btn-primary">Add</a>
                                                       <a routerLink="/buyorsellstocks/{{i.id}}/SELL/{{i.stockName}}" class="btn btn-danger">Sell</a>
                                                 </div>

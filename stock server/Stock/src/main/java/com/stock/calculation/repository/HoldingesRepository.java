@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.stock.calculation.entitys.Holdings;
+import com.stock.calculation.entitys.YearAndMonth;
 
 
 @Repository
@@ -39,4 +40,15 @@ public interface HoldingesRepository extends JpaRepository<Holdings, Long> {
 	@Modifying
 	@Query(value="UPDATE holdings SET duration = ?1 WHERE status='UNSOLD' and stock_name=?2", nativeQuery = true)
 	public int changingDuration(String Stockduration, String stockName);
+	
+	
+	@Query(value="select * from holdings where stock_name= ?1 and yearmonth_id=?2 "
+			+ "and id=(select max(id) from holdings where stock_name=?1)", nativeQuery = true)
+	public List<Holdings> findByStockNameAndMonth(String stockName, long yearMonth);
+	
+	
+	
+	public List<Holdings> findByYearMonth(YearAndMonth yearMonth);
+	
+	public List<Holdings> findByStockName(String stockName);
 }

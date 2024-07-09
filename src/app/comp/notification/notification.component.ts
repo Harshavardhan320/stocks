@@ -13,6 +13,7 @@ import { window } from 'rxjs';
 })
 export class NotificationComponent implements OnInit{
 
+
   notificationCount:any =0;
   error:any=0
   message:String="Notification";
@@ -60,6 +61,16 @@ export class NotificationComponent implements OnInit{
     });
     
     location.reload();
+  }
 
+  update() {
+    this.service.update().subscribe({
+      next: (value) => {
+        alert("update all records to seen");
+      },error:(err)=>{
+        this.errors(err);
+      }
+    });
+    location.reload();
   }
 }

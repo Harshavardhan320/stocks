@@ -126,6 +126,12 @@ public class Holdings {
 		SHORTTERM,
 		LONGTERM
 	}
+	/*
+	 * 14
+	 * 
+	 */
+	@Column(name="squareofvalue", columnDefinition ="double default 0.0")
+	private double squarOffValue =0.0;
 }
 
 

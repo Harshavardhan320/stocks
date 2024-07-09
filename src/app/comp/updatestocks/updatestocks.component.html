@@ -1,9 +1,10 @@
-<div class="container-lg">
+<div class="container-lg mt-1">
       <div class="row">
-           <div class="col">
-            <p class="{{class}}">{{message}}</p>
-           </div>
-           <div class="col"></div>
+            <div class="col-md-12">
+                  <div class="{{class}}">
+                        <p>{{message}}</p>
+                  </div>
+            </div>
       </div>
 </div>
 <div class="container-lg">
@@ -16,14 +17,10 @@
             </div>
       </div>
 </div>
-<div *ngIf="displayStocks.length != 0" class="m-4">
+<div *ngIf="displayStocks.length != 0" class="m-1">
       <div class="card rounded">
-            <div class="card-header {{subclass}}">
-                  <h2>{{submessage}}</h2>
-            </div>
-            <div class="card-body overflow-auto rounded" style="height: 350px;">
+            <div class="card-body overflow-auto rounded" style="height: 360px;">
                   <div *ngFor="let i of displayStocks">
-                        
                         <form #updatestock="ngForm" (ngSubmit)="updatestocks(updatestock)">
                               <input type="hidden" class="form-control" [(ngModel)]="i.value.id" readonly name="id">
                               <div class="row mt-3">

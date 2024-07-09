@@ -79,7 +79,7 @@ export class HoldingsService {
     service method for updating current price and duration of the stock
 
   */
-    public updateCurrPriceDuration(data:any, duration:string):Observable<any>{
-      return this.Http.post(url+`update/holdings/${duration}`, data);
+    public updateCurrPriceDuration(data:any, duration:string, value:any):Observable<any>{
+      return this.Http.post(url+`update/holdings/${duration}/${value}`, data);
     }
 }
